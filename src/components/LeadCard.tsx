@@ -104,9 +104,43 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           <span className="line-clamp-2">{lead.address}</span>
         </div>
 
+        {/* Direct Contact Phone Box */}
+        <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 mb-2 flex items-center justify-between text-xs">
+          <div className="flex items-center space-x-1.5 truncate">
+            <MessageCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="text-slate-400 font-medium">Contato:</span>
+            {lead.phone ? (
+              <a
+                href={`tel:${lead.phone.replace(/\D/g, '')}`}
+                className="font-mono text-emerald-300 font-bold hover:underline truncate"
+                title="Clique para ligar"
+              >
+                {lead.phone}
+              </a>
+            ) : (
+              <a
+                href={lead.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.name + ' ' + lead.city)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand-400 hover:text-brand-300 font-medium underline flex items-center space-x-1"
+                title="Buscar telefone e WhatsApp no Google Maps"
+              >
+                <span>Ver telefone no Google</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+
+          {lead.phone && (
+            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0 ml-1">
+              Direto
+            </span>
+          )}
+        </div>
+
         {/* Detected URL if any */}
         {lead.detectedUrl && (
-          <div className="text-[11px] text-slate-500 mb-3 truncate flex items-center space-x-1">
+          <div className="text-[11px] text-slate-500 mb-2 truncate flex items-center space-x-1">
             <Globe className="w-3 h-3 text-slate-600" />
             <span className="text-slate-400">URL:</span>
             <span className="text-slate-500 truncate">{lead.detectedUrl}</span>

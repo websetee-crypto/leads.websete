@@ -218,7 +218,7 @@ async function fetchFromOverpassAPI(
     const elLng = el.lon || (el.center ? el.center.lon : lon);
 
     const rawWebsite = tags['website'] || tags['contact:website'] || tags['url'] || '';
-    const rawPhone = tags['phone'] || tags['contact:phone'] || tags['mobile'] || '';
+    const rawPhone = tags['phone'] || tags['contact:phone'] || tags['mobile'] || tags['contact:mobile'] || tags['phone:mobile'] || tags['whatsapp'] || tags['contact:whatsapp'] || tags['telephone'] || tags['tel'] || '';
     const rawInstagram = tags['contact:instagram'] || tags['instagram'] || '';
     const rawFacebook = tags['contact:facebook'] || tags['facebook'] || '';
 

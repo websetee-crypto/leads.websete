@@ -161,6 +161,48 @@ export const COUNTRIES: LocationCountry[] = [
         name: 'Maranhão',
         center: [-2.5307, -44.3068],
         cities: ['São Luís', 'Imperatriz', 'São José de Ribamar', 'Timon', 'Caxias']
+      },
+      {
+        code: 'PI',
+        name: 'Piauí',
+        center: [-5.0892, -42.8016],
+        cities: ['Teresina', 'Parnaíba', 'Picos', 'Piripiri', 'Floriano']
+      },
+      {
+        code: 'SE',
+        name: 'Sergipe',
+        center: [-10.9472, -37.0731],
+        cities: ['Aracaju', 'Nossa Senhora do Socorro', 'Lagarto', 'Itabaiana', 'São Cristóvão']
+      },
+      {
+        code: 'TO',
+        name: 'Tocantins',
+        center: [-10.1849, -48.3338],
+        cities: ['Palmas', 'Araguaína', 'Gurupi', 'Porto Nacional', 'Paraíso do Tocantins']
+      },
+      {
+        code: 'RO',
+        name: 'Rondônia',
+        center: [-8.7619, -63.9039],
+        cities: ['Porto Velho', 'Ji-Paraná', 'Ariquemes', 'Vilhena', 'Cacoal']
+      },
+      {
+        code: 'AC',
+        name: 'Acre',
+        center: [-9.9753, -67.8249],
+        cities: ['Rio Branco', 'Cruzeiro do Sul', 'Sena Madureira', 'Tarauacá', 'Feijó']
+      },
+      {
+        code: 'AP',
+        name: 'Amapá',
+        center: [0.0389, -51.0664],
+        cities: ['Macapá', 'Santana', 'Laranjal do Jari', 'Oiapoque', 'Porto Grande']
+      },
+      {
+        code: 'RR',
+        name: 'Roraima',
+        center: [2.8235, -60.6758],
+        cities: ['Boa Vista', 'Rorainópolis', 'Caracaraí', 'Pacaraima', 'Cantá']
       }
     ]
   },
