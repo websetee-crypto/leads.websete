@@ -74,58 +74,109 @@ export async function searchLeadsService(
   const city = filter.city || state.cities[0] || 'São Paulo';
   const niche = NICHES.find((n) => n.id === filter.category) || NICHES[0];
 
-  // If user selected explicit OSM live search or auto with internet available
-  if (filter.searchSource === 'openstreetmap' || filter.searchSource === 'auto') {
+  // 1. Google Places API (if API Key provided)
+  if (apiSettings.googlePlacesApiKey && (filter.searchSource === 'google_places' || filter.searchSource === 'auto')) {
     try {
-      const liveOsmLeads = await fetchFromOverpassAPI(country.code, state.code, city, niche, apiSettings);
+      const googleLeads = await fetchFromGooglePlacesAPI(country.code, state.code, city, niche, filter, apiSettings);
+      if (googleLeads && googleLeads.length > 0) {
+        const filtered = applyPostFilters(googleLeads, filter);
+        return {
+          leads: filtered,
+          searchMode: 'Google Places API (Empresas Reais Verificadas)',
+          totalFound: filtered.length
+        };
+      }
+    } catch (e) {
+      console.warn('Google Places API search failed, falling back to OpenStreetMap:', e);
+    }
+  }
+
+  // 2. OpenStreetMap Overpass Live Search (Real Registered Businesses)
+  if (filter.searchSource === 'openstreetmap' || filter.searchSource === 'auto' || filter.searchSource === 'google_places') {
+    try {
+      const liveOsmLeads = await fetchFromOverpassAPI(country, state, city, niche, apiSettings);
       if (liveOsmLeads && liveOsmLeads.length > 0) {
         const filtered = applyPostFilters(liveOsmLeads, filter);
         return {
           leads: filtered,
-          searchMode: 'OpenStreetMap (Dados Reais ao Vivo)',
+          searchMode: 'OpenStreetMap (Empresas Reais ao Vivo)',
           totalFound: filtered.length
         };
       }
-    } catch {
-      // Overpass failed or timed out, will fall back to smart local business engine
+    } catch (e) {
+      console.warn('Overpass OSM search returned no items or timed out:', e);
     }
   }
 
-  // Fallback / High-Fidelity Smart Generator Engine
+  // 3. Fallback / Generator Mode
   const generatedLeads = generateRealisticLeads(country, state, city, niche, filter);
   const filtered = applyPostFilters(generatedLeads, filter);
 
   return {
     leads: filtered,
-    searchMode: 'Motor de Prospecção Inteligente (Alta Precisão)',
+    searchMode: 'Motor de Prospecção Inteligente (Modo Demonstração)',
     totalFound: filtered.length
   };
 }
 
+async function getCoordinatesForCity(
+  cityName: string,
+  stateName: string,
+  countryName: string,
+  defaultCenter: [number, number]
+): Promise<[number, number]> {
+  try {
+    const query = encodeURIComponent(`${cityName}, ${stateName}, ${countryName}`);
+    const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'LeadSitePro/1.0'
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        if (!isNaN(lat) && !isNaN(lon)) {
+          return [lat, lon];
+        }
+      }
+    }
+  } catch {
+    // Nominatim error fallback
+  }
+  return defaultCenter;
+}
+
 async function fetchFromOverpassAPI(
-  countryCode: string,
-  stateCode: string,
+  country: typeof COUNTRIES[0],
+  state: typeof COUNTRIES[0]['states'][0],
   cityName: string,
   niche: typeof NICHES[0],
   apiSettings: ApiSettings
 ): Promise<Lead[]> {
   const endpoint = apiSettings.overpassCustomEndpoint || 'https://overpass-api.de/api/interpreter';
 
-  // Construct Overpass query
+  // Get precise coordinates for city
+  const [lat, lon] = await getCoordinatesForCity(cityName, state.name, country.name, state.center);
+
+  // Search radius in meters (22km around city center)
+  const radius = 22000;
+
   // Map niche osmFilter to Overpass query tags
   const tags = niche.osmFilter.split('|');
   const tagQueries = tags.map((t) => {
     const [k, v] = t.split('=');
-    return `node["${k}"="${v}"](area.searchArea);way["${k}"="${v}"](area.searchArea);`;
+    return `node["${k}"="${v}"](around:${radius},${lat},${lon});way["${k}"="${v}"](around:${radius},${lat},${lon});`;
   }).join('');
 
   const query = `
     [out:json][timeout:15];
-    area["name"="${cityName}"]->.searchArea;
     (
       ${tagQueries}
     );
-    out center 40;
+    out center 50;
   `;
 
   const controller = new AbortController();
@@ -158,9 +209,13 @@ async function fetchFromOverpassAPI(
   for (let i = 0; i < elements.length; i++) {
     const el = elements[i];
     const tags = el.tags || {};
-    const name = tags.name || tags['brand'] || `${niche.keywords[0]} ${cityName} #${i + 1}`;
-    const lat = el.lat || (el.center ? el.center.lat : 0);
-    const lng = el.lon || (el.center ? el.center.lon : 0);
+    
+    // Only keep real named establishments
+    const rawName = tags.name || tags['brand'] || tags['operator'];
+    if (!rawName) continue;
+
+    const elLat = el.lat || (el.center ? el.center.lat : lat);
+    const elLng = el.lon || (el.center ? el.center.lon : lon);
 
     const rawWebsite = tags['website'] || tags['contact:website'] || tags['url'] || '';
     const rawPhone = tags['phone'] || tags['contact:phone'] || tags['mobile'] || '';
@@ -183,60 +238,134 @@ async function fetchFromOverpassAPI(
       websiteStatus = 'SOCIAL_ONLY';
       detectedUrl = rawInstagram ? `https://instagram.com/${rawInstagram.replace('@', '')}` : rawFacebook;
     } else {
-      // 80% without website or with simple missing landing page
-      const rand = Math.random();
-      if (rand < 0.60) {
-        websiteStatus = 'NO_WEBSITE';
-      } else if (rand < 0.85) {
-        websiteStatus = 'NO_LANDING_PAGE';
-        detectedUrl = `https://instagram.com/${slugify(name)}`;
-      } else {
-        websiteStatus = 'BROKEN_WEBSITE';
-        detectedUrl = `http://www.${slugify(name)}.com.br`;
-      }
+      websiteStatus = 'NO_WEBSITE';
     }
 
-    const rating = parseFloat((3.8 + Math.random() * 1.2).toFixed(1));
-    const reviewsCount = Math.floor(8 + Math.random() * 120);
+    const rating = parseFloat((4.2 + (i % 8) * 0.1).toFixed(1));
+    const reviewsCount = Math.floor(15 + (i * 7) % 180);
 
-    // Calculate opportunity score
     const opportunityScore = calculateOpportunityScore(websiteStatus, rating, reviewsCount, Boolean(rawPhone));
 
-    const street = tags['addr:street'] || STREET_NAMES_BR[i % STREET_NAMES_BR.length];
-    const houseNumber = tags['addr:housenumber'] || `${Math.floor(50 + Math.random() * 1800)}`;
-    const suburb = tags['addr:suburb'] || tags['addr:district'] || 'Centro';
-
-    const address = `${street}, ${houseNumber} - ${suburb}, ${cityName} - ${stateCode}`;
+    const street = tags['addr:street'] || tags['addr:place'] || `Região Central`;
+    const houseNumber = tags['addr:housenumber'] ? `, ${tags['addr:housenumber']}` : '';
+    const suburb = tags['addr:suburb'] || tags['addr:district'] || '';
+    const address = `${street}${houseNumber}${suburb ? ' - ' + suburb : ''}, ${cityName} - ${state.code}`;
 
     leads.push({
       id: `osm-${el.id || i}-${Date.now()}`,
-      name: name,
+      name: rawName,
       category: niche.name,
       categoryKey: niche.id,
-      country: countryCode,
-      countryCode: countryCode,
-      state: stateCode,
+      country: country.name,
+      countryCode: country.code,
+      state: state.name,
       city: cityName,
       address,
-      phone: rawPhone || generateFakePhone(countryCode, stateCode),
-      whatsapp: rawPhone ? rawPhone.replace(/\D/g, '') : generateFakePhone(countryCode, stateCode).replace(/\D/g, ''),
+      phone: rawPhone || undefined,
+      whatsapp: rawPhone ? rawPhone.replace(/\D/g, '') : undefined,
       rating,
       reviewsCount,
       websiteStatus,
       detectedUrl,
-      lat,
-      lng,
+      lat: elLat,
+      lng: elLng,
       source: 'openstreetmap',
       stage: 'novo',
       opportunityScore,
       estimatedMonthlyLoss: niche.estMonthlyLoss + Math.floor(Math.random() * 1500),
       missingFeatures: niche.typicalPainPoints,
-      googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + cityName)}`,
+      googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rawName + ' ' + cityName)}`,
       createdAt: new Date().toISOString()
     });
   }
 
+  if (leads.length === 0) {
+    throw new Error('Nenhum estabelecimento com nome válido encontrado.');
+  }
+
   return leads;
+}
+
+async function fetchFromGooglePlacesAPI(
+  countryCode: string,
+  stateCode: string,
+  cityName: string,
+  niche: typeof NICHES[0],
+  filter: SearchFilterState,
+  apiSettings: ApiSettings
+): Promise<Lead[]> {
+  const apiKey = apiSettings.googlePlacesApiKey;
+  if (!apiKey) return [];
+
+  const textQuery = `${niche.keywords[0]} em ${cityName}, ${stateCode}`;
+  
+  // Google Places API (New - Text Search)
+  const url = 'https://places.googleapis.com/v1/places:searchText';
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Goog-Api-Key': apiKey,
+      'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.internationalPhoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.location,places.googleMapsUri'
+    },
+    body: JSON.stringify({
+      textQuery,
+      maxResultCount: 20
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Google Places API returned ${response.status}`);
+  }
+
+  const data = await response.json();
+  const places = data.places || [];
+
+  return places.map((p: any, idx: number) => {
+    const name = p.displayName?.text || `${niche.keywords[0]} ${idx + 1}`;
+    const rawWebsite = p.websiteUri || '';
+    const phone = p.nationalPhoneNumber || p.internationalPhoneNumber || '';
+
+    let websiteStatus: WebsiteStatus = 'NO_WEBSITE';
+    if (rawWebsite) {
+      if (rawWebsite.includes('instagram.com') || rawWebsite.includes('facebook.com') || rawWebsite.includes('linktr.ee') || rawWebsite.includes('wa.me')) {
+        websiteStatus = 'SOCIAL_ONLY';
+      } else {
+        websiteStatus = 'HAS_WEBSITE';
+      }
+    }
+
+    const rating = p.rating || 4.5;
+    const reviewsCount = p.userRatingCount || 20;
+    const opportunityScore = calculateOpportunityScore(websiteStatus, rating, reviewsCount, Boolean(phone));
+
+    return {
+      id: `google-${p.id || idx}`,
+      name,
+      category: niche.name,
+      categoryKey: niche.id,
+      country: countryCode,
+      countryCode,
+      state: stateCode,
+      city: cityName,
+      address: p.formattedAddress || `${cityName} - ${stateCode}`,
+      phone: phone || undefined,
+      whatsapp: phone ? phone.replace(/\D/g, '') : undefined,
+      rating,
+      reviewsCount,
+      websiteStatus,
+      detectedUrl: rawWebsite || undefined,
+      lat: p.location?.latitude || 0,
+      lng: p.location?.longitude || 0,
+      source: 'google_places' as const,
+      stage: 'novo' as const,
+      opportunityScore,
+      estimatedMonthlyLoss: niche.estMonthlyLoss,
+      missingFeatures: niche.typicalPainPoints,
+      googleMapsUrl: p.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + cityName)}`,
+      createdAt: new Date().toISOString()
+    };
+  });
 }
 
 function generateRealisticLeads(

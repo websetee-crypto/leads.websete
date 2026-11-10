@@ -42,9 +42,24 @@ export const LeadCard: React.FC<LeadCardProps> = ({
       <div>
         <div className="flex items-start justify-between gap-2 mb-2">
           
-          {/* Status Badge */}
-          <div>
+          {/* Status Badge & Real Source Badge */}
+          <div className="flex flex-wrap items-center gap-1.5">
             {getStatusBadge(lead.websiteStatus)}
+            {lead.source === 'openstreetmap' && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-300 border border-blue-500/30" title="Estabelecimento Real Verificado no OpenStreetMap">
+                🌐 Real (OSM)
+              </span>
+            )}
+            {lead.source === 'google_places' && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30" title="Estabelecimento Real Verificado no Google Places">
+                ⭐ Real (Google)
+              </span>
+            )}
+            {lead.source === 'smart_generator' && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700" title="Dado sintético para testes">
+                🤖 Demonstração
+              </span>
+            )}
           </div>
 
           {/* Opportunity Score Pill */}
