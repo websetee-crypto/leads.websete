@@ -256,7 +256,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
           <span className="text-slate-400 font-semibold whitespace-nowrap flex items-center">
             <Sparkles className="w-3 h-3 text-brand-400 mr-1" /> Nichos Rápidos:
           </span>
-          {NICHES.slice(0, 6).map((n) => (
+          {NICHES.slice(0, 9).map((n) => (
             <button
               key={n.id}
               onClick={() => {
@@ -268,7 +268,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                   : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
               }`}
             >
-              {n.name.split('/')[0]}
+              {n.name.split('/')[0].replace('🏬 ', '')}
             </button>
           ))}
         </div>

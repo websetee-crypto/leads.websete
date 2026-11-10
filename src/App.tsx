@@ -36,12 +36,12 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'search' | 'crm' | 'map' | 'playbook'>('search');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
-  // Search filter state
+  // Search filter state - Defaults to All Commercial Types
   const [filters, setFilters] = useState<SearchFilterState>({
     countryCode: 'BR',
     stateCode: 'SP',
     city: 'São Paulo',
-    category: 'dentista',
+    category: 'todos_comercios',
     customKeyword: '',
     statusFilter: 'WITHOUT_ANY_SITE',
     onlyWithPhone: false,

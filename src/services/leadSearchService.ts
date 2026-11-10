@@ -46,7 +46,19 @@ const STREET_NAMES_US = [
 
 // Business name modifiers by niche
 const NICHE_PREFIXES: Record<string, string[]> = {
+  todos_comercios: [
+    'Supermercado & Mercearia', 'Padaria & Confeitaria', 'Loja de Moda & Roupas', 'Restaurante & Bistrô',
+    'Hamburgueria & Lanches', 'Auto Center & Mecânica', 'Clínica Odontológica', 'Studio de Estética',
+    'Salão de Beleza & Barba', 'Farmácia & Drogaria', 'Pet Shop & Veterinária', 'Marcenaria & Design',
+    'Bar & Choperia', 'Academia & Fitness', 'Lava Rápido & Estética Auto', 'Escritório de Advocacia'
+  ],
   dentista: ['Clínica Odontológica', 'Dr(a).', 'Studio Dental', 'Centro de Ortodontia', 'Odonto Prime', 'Implantes & Sorrisos', 'Oral Clinic', 'Sorriso Radiante'],
+  farmacia: ['Drogaria & Farmácia', 'Farmácia Popular', 'Farma Prime', 'Drogaria São', 'Vida & Saúde Medicamentos', 'Droga Central'],
+  padaria: ['Padaria & Confeitaria', 'Panificadora', 'Pão de Ouro', 'Doce Sabor Confeitaria', 'Ateliê dos Pães', 'Café & Pão'],
+  roupas: ['Boutique & Moda', 'Loja de Roupas', 'Moda Feminina & Masculina', 'Espaço Fashion', 'Calçados & Acessórios', 'Outlet Store'],
+  hamburgueria: ['Burger & Cia', 'Hamburgueria Artesanal', 'Pizzaria & Lanches', 'Gourmet Burguer', 'Forno & Sabor Pizzaria', 'Taverna Burger'],
+  bar: ['Bar & Choperia', 'Pub & Petiscaria', 'Adega & Distribuidora', 'Boteco Prime', 'Biergarten', 'Espaço Chopp'],
+  lavarapido: ['Lava Rápido Express', 'Estética Automotiva', 'Brilho Car', 'Auto Detailing', 'Borracharia & Pneus', 'Pit Wash'],
   estetica: ['Studio de Beleza', 'Clínica de Estética', 'Harmonize', 'Espaço Glamour', 'Skin & Laser', 'Estética Avançada', 'Dermo Prime', 'Clínica Belleza'],
   restaurante: ['Restaurante & Bar', 'Bistrô', 'Cantina', 'Pizzaria & Forno', 'Churrascaria', 'Sabor da Terra', 'Espaço Gourmet', 'Fogão de Ouro'],
   oficina: ['Auto Center', 'Oficina Mecânica', 'Mecânica Express', 'Pit Stop', 'Centro Automotivo', 'Box 7 Auto', 'Garage Motors', 'Precision Auto'],
@@ -164,19 +176,31 @@ async function fetchFromOverpassAPI(
   // Search radius in meters (22km around city center)
   const radius = 22000;
 
-  // Map niche osmFilter to Overpass query tags
-  const tags = niche.osmFilter.split('|');
-  const tagQueries = tags.map((t) => {
-    const [k, v] = t.split('=');
-    return `node["${k}"="${v}"](around:${radius},${lat},${lon});way["${k}"="${v}"](around:${radius},${lat},${lon});`;
-  }).join('');
+  let tagQueries = '';
+  if (niche.id === 'todos_comercios') {
+    // Broad scan covering ALL commerce types
+    tagQueries = `
+      node["shop"](around:${radius},${lat},${lon});
+      way["shop"](around:${radius},${lat},${lon});
+      node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|dentist|beauty_salon|clinic|veterinary|car_wash|car_repair|bakers"](around:${radius},${lat},${lon});
+      way["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|dentist|beauty_salon|clinic|veterinary|car_wash|car_repair|bakers"](around:${radius},${lat},${lon});
+      node["craft"](around:${radius},${lat},${lon});
+      node["office"](around:${radius},${lat},${lon});
+    `;
+  } else {
+    const tags = niche.osmFilter.split('|');
+    tagQueries = tags.map((t) => {
+      const [k, v] = t.split('=');
+      return `node["${k}"="${v}"](around:${radius},${lat},${lon});way["${k}"="${v}"](around:${radius},${lat},${lon});`;
+    }).join('');
+  }
 
   const query = `
     [out:json][timeout:15];
     (
       ${tagQueries}
     );
-    out center 50;
+    out center 60;
   `;
 
   const controller = new AbortController();
@@ -252,11 +276,12 @@ async function fetchFromOverpassAPI(
     const address = `${street}${houseNumber}${suburb ? ' - ' + suburb : ''}, ${cityName} - ${state.code}`;
 
     const closingHours = formatBusinessClosingHours(tags['opening_hours'] || '', niche.id);
+    const resolvedCategory = resolveDynamicCategory(tags, niche.name);
 
     leads.push({
       id: `osm-${el.id || i}-${Date.now()}`,
       name: rawName,
-      category: niche.name,
+      category: resolvedCategory,
       categoryKey: niche.id,
       country: country.name,
       countryCode: country.code,
@@ -500,6 +525,63 @@ function generateFakePhone(countryCode: string, stateCode: string): string {
     return `+1 (${area}) ${p1}-${p2}`;
   }
   return `+55 (11) 98765-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+function resolveDynamicCategory(tags: Record<string, string>, defaultName: string): string {
+  if (tags.shop) {
+    switch (tags.shop) {
+      case 'supermarket': case 'convenience': case 'grocery': return 'Supermercado / Mercearia';
+      case 'clothes': case 'boutique': case 'fashion': return 'Loja de Roupas & Moda';
+      case 'shoes': return 'Loja de Calçados';
+      case 'bakery': case 'pastry': return 'Padaria & Confeitaria';
+      case 'hairdresser': return 'Salão de Beleza / Barbearia';
+      case 'beauty': case 'cosmetics': return 'Clínica de Estética & Beleza';
+      case 'car_repair': return 'Oficina Mecânica & Auto';
+      case 'pet': return 'Pet Shop';
+      case 'optician': return 'Ótica & Óculos';
+      case 'jewelry': return 'Joalheria & Acessórios';
+      case 'florist': return 'Floricultura & Decoração';
+      case 'furniture': return 'Móveis & Decoração';
+      default: return `Loja de ${tags.shop.charAt(0).toUpperCase() + tags.shop.slice(1)}`;
+    }
+  }
+
+  if (tags.amenity) {
+    switch (tags.amenity) {
+      case 'restaurant': return 'Restaurante & Gastronomia';
+      case 'cafe': return 'Cafeteria & Bistrô';
+      case 'fast_food': return 'Lanchonete & Fast Food';
+      case 'bar': case 'pub': return 'Bar, Pub & Chopp';
+      case 'pharmacy': return 'Farmácia & Drogaria';
+      case 'dentist': return 'Clínica Odontológica';
+      case 'clinic': case 'doctors': return 'Clínica Médica & Saúde';
+      case 'veterinary': return 'Clínica Veterinária';
+      case 'car_wash': return 'Lava Rápido & Estética Auto';
+      case 'school': case 'language_school': return 'Escola & Cursos';
+      default: return defaultName;
+    }
+  }
+
+  if (tags.craft) {
+    switch (tags.craft) {
+      case 'carpenter': return 'Marcenaria & Móveis Planejados';
+      case 'glaziery': return 'Vidraçaria';
+      case 'electrician': return 'Instalações & Elétrica';
+      case 'plumber': return 'Encanador & Reformas';
+      default: return 'Serviços Especializados';
+    }
+  }
+
+  if (tags.office) {
+    switch (tags.office) {
+      case 'lawyer': return 'Escritório de Advocacia';
+      case 'accountant': return 'Contabilidade & Consultoria';
+      case 'estate_agent': return 'Imobiliária';
+      default: return 'Escritório & Consultoria';
+    }
+  }
+
+  return defaultName;
 }
 
 function formatBusinessClosingHours(rawHours: string, nicheId: string): string {
