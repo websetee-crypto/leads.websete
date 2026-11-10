@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Globe, MessageCircle, MapPin, Star, Flame, 
-  ExternalLink, Copy, Check, ShieldAlert, Kanban, Eye, AlertCircle
+import {
+  Globe, MessageCircle, MapPin, Star, Flame,
+  ExternalLink, Copy, Check, ShieldAlert, Kanban, Eye, AlertCircle,
+  Clock, PhoneCall, Sparkles
 } from 'lucide-react';
 import { Lead } from '../types';
 
@@ -23,10 +24,23 @@ export const LeadCard: React.FC<LeadCardProps> = ({
   const [copied, setCopied] = useState(false);
 
   const copyQuickInfo = () => {
-    const text = `${lead.name} | ${lead.category} em ${lead.city}-${lead.state}\nTelefone: ${lead.phone || 'N/A'}\nStatus: ${getStatusText(lead.websiteStatus)}\nGoogle Maps: ${lead.googleMapsUrl || ''}`;
+    const text = `${lead.name} | ${lead.category} em ${lead.city}-${lead.state}\nTelefone: ${lead.phone || 'N/A'}\nHorário: ${lead.closingHours || 'Horário Comercial'}\nStatus: ${getStatusText(lead.websiteStatus)}\nGoogle Maps: ${lead.googleMapsUrl || ''}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDirectWhatsApp = () => {
+    const cleanPhone = (lead.whatsapp || lead.phone || '').replace(/\D/g, '');
+    const defaultPitch = `Olá, tudo bem? Notei que a ${lead.name} tem ótimas avaliações em ${lead.city}, mas ainda não possui um site oficial ou landing page para captar clientes do Google. Vocês têm interesse em criar uma página profissional de alta conversão?`;
+    const encoded = encodeURIComponent(defaultPitch);
+    
+    if (cleanPhone) {
+      const fullNum = cleanPhone.startsWith('55') || cleanPhone.startsWith('351') || cleanPhone.startsWith('1') ? cleanPhone : '55' + cleanPhone;
+      window.open(`https://wa.me/${fullNum}?text=${encoded}`, '_blank');
+    } else {
+      onOpenPitch(lead);
+    }
   };
 
   const formattedLoss = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(lead.estimatedMonthlyLoss);
@@ -86,16 +100,22 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           {lead.category}
         </p>
 
-        {/* Rating & Reviews */}
-        <div className="flex items-center space-x-2 text-xs text-slate-300 mb-3 bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">
+        {/* Rating, Reviews & Loss */}
+        <div className="flex items-center space-x-2 text-xs text-slate-300 mb-2 bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">
           <div className="flex items-center text-amber-400 font-bold">
             <Star className="w-3.5 h-3.5 fill-amber-400 mr-1" />
             <span>{lead.rating || '4.8'}</span>
           </div>
           <span className="text-slate-600">•</span>
-          <span className="text-slate-400">({lead.reviewsCount || 24} avaliações Google)</span>
+          <span className="text-slate-400">({lead.reviewsCount || 24} avaliações)</span>
           <span className="text-slate-600">•</span>
           <span className="text-red-400 font-semibold text-[11px]">Perde ~{formattedLoss}/mês</span>
+        </div>
+
+        {/* Closing Hours Badge */}
+        <div className="flex items-center space-x-1.5 text-xs text-emerald-400 font-medium mb-2 bg-emerald-950/20 border border-emerald-800/30 px-2.5 py-1 rounded-xl">
+          <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="truncate">{lead.closingHours || 'Aberto • Horário Comercial'}</span>
         </div>
 
         {/* Address */}
@@ -107,13 +127,13 @@ export const LeadCard: React.FC<LeadCardProps> = ({
         {/* Direct Contact Phone Box */}
         <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 mb-2 flex items-center justify-between text-xs">
           <div className="flex items-center space-x-1.5 truncate">
-            <MessageCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="text-slate-400 font-medium">Contato:</span>
+            <PhoneCall className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+            <span className="text-slate-400 font-medium">Telefone:</span>
             {lead.phone ? (
               <a
                 href={`tel:${lead.phone.replace(/\D/g, '')}`}
                 className="font-mono text-emerald-300 font-bold hover:underline truncate"
-                title="Clique para ligar"
+                title="Clique para ligar direto agora"
               >
                 {lead.phone}
               </a>
@@ -125,17 +145,21 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                 className="text-brand-400 hover:text-brand-300 font-medium underline flex items-center space-x-1"
                 title="Buscar telefone e WhatsApp no Google Maps"
               >
-                <span>Ver telefone no Google</span>
+                <span>Buscar no Google</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
             )}
           </div>
 
-          {lead.phone && (
-            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0 ml-1">
-              Direto
-            </span>
-          )}
+          {lead.phone ? (
+            <a
+              href={`tel:${lead.phone.replace(/\D/g, '')}`}
+              className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 hover:bg-emerald-500/30 px-2 py-0.5 rounded border border-emerald-500/30 shrink-0 ml-1 transition"
+              title="Ligar direto"
+            >
+              📞 Ligar
+            </a>
+          ) : null}
         </div>
 
         {/* Detected URL if any */}
@@ -151,18 +175,55 @@ export const LeadCard: React.FC<LeadCardProps> = ({
       {/* Bottom Action Buttons */}
       <div className="pt-3 border-t border-slate-800/80 mt-2 space-y-2">
         
-        {/* Main WhatsApp Pitch Button */}
-        <button
-          onClick={() => onOpenPitch(lead)}
-          className="w-full bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold text-xs sm:text-sm py-2.5 px-3 rounded-xl flex items-center justify-center space-x-2 shadow-md shadow-emerald-600/20 transition transform active:scale-[0.98]"
-        >
-          <MessageCircle className="w-4 h-4 fill-slate-950" />
-          <span>Enviar Pitch no WhatsApp</span>
-        </button>
+        {/* Main Action Buttons Grid: Direct WhatsApp & Call */}
+        <div className="grid grid-cols-2 gap-2">
+          
+          {/* Direct WhatsApp Call */}
+          <button
+            onClick={handleDirectWhatsApp}
+            className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/20 transition transform active:scale-[0.98]"
+            title="Abrir conversa direta no WhatsApp"
+          >
+            <MessageCircle className="w-4 h-4 fill-slate-950" />
+            <span>WhatsApp Direto</span>
+          </button>
+
+          {/* Direct Call or Custom Pitch */}
+          {lead.phone ? (
+            <a
+              href={`tel:${lead.phone.replace(/\D/g, '')}`}
+              className="bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center space-x-1.5 shadow-md shadow-blue-600/20 transition transform active:scale-[0.98]"
+              title="Ligar agora para o estabelecimento"
+            >
+              <PhoneCall className="w-4 h-4" />
+              <span>Ligar Agora</span>
+            </a>
+          ) : (
+            <button
+              onClick={() => onOpenPitch(lead)}
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center space-x-1.5 border border-slate-700 transition"
+              title="Ver Modelos de Pitch"
+            >
+              <Sparkles className="w-4 h-4 text-amber-400" />
+              <span>Ver Pitch</span>
+            </button>
+          )}
+
+        </div>
 
         {/* Secondary Tool Buttons */}
         <div className="grid grid-cols-4 gap-1.5 pt-1">
           
+          {/* Pitch Editor Modal Button */}
+          <button
+            onClick={() => onOpenPitch(lead)}
+            title="Modelos de Mensagem e Pitch"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center space-x-1 border border-slate-700 transition"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Pitch</span>
+          </button>
+
           {/* Audit Button */}
           <button
             onClick={() => onOpenAudit(lead)}
@@ -195,17 +256,6 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
           </button>
-
-          {/* Google Maps link */}
-          <a
-            href={lead.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.name + ' ' + lead.city)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Abrir no Google Maps"
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center border border-slate-700 transition"
-          >
-            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-          </a>
 
         </div>
 

@@ -11,6 +11,21 @@ export interface NicheCategory {
 
 export const NICHES: NicheCategory[] = [
   {
+    id: 'todos_comercios',
+    name: '🏬 Todo Tipo de Comércio & Negócios Locais',
+    icon: 'Store',
+    osmFilter: 'shop=yes|shop=supermarket|shop=clothes|shop=bakery|shop=hairdresser|shop=beauty|shop=car_repair|shop=convenience|shop=pet|amenity=restaurant|amenity=cafe|amenity=pharmacy|amenity=dentist|amenity=bar|craft=yes|office=yes',
+    keywords: ['Comércio', 'Loja', 'Serviços', 'Empresa', 'Atendimento'],
+    avgTicket: 1500,
+    estMonthlyLoss: 4500,
+    typicalPainPoints: [
+      'Sem catálogo de produtos e serviços online',
+      'Perde vendas de clientes locais no Google',
+      'Sem botão de WhatsApp e pedidos diretos',
+      'Sem presença digital estruturada'
+    ]
+  },
+  {
     id: 'dentista',
     name: 'Clínica Odontológica / Dentista',
     icon: 'Stethoscope',
@@ -23,6 +38,96 @@ export const NICHES: NicheCategory[] = [
       'Perde pacientes que buscam no Google Maps',
       'Sem apresentação clara de tratamentos e fotos antes/depois',
       'Dependente 100% de indicações boca a boca'
+    ]
+  },
+  {
+    id: 'farmacia',
+    name: 'Farmácia & Drogaria',
+    icon: 'Pill',
+    osmFilter: 'amenity=pharmacy|healthcare=pharmacy',
+    keywords: ['Farmácia', 'Drogaria', 'Medicamentos', 'Manipulação', 'Perfumaria'],
+    avgTicket: 90,
+    estMonthlyLoss: 3800,
+    typicalPainPoints: [
+      'Sem botão de WhatsApp para entrega rápida e cotação de receitas',
+      'Perde clientes do bairro que compram online em grandes redes',
+      'Sem catálogo de ofertas e perfumaria',
+      'Sem site com horário de plantão e localização'
+    ]
+  },
+  {
+    id: 'padaria',
+    name: 'Padaria, Confeitaria & Panificadora',
+    icon: 'Croissant',
+    osmFilter: 'shop=bakery|shop=pastry',
+    keywords: ['Padaria', 'Confeitaria', 'Panificadora', 'Bolos', 'Doceria', 'Café'],
+    avgTicket: 60,
+    estMonthlyLoss: 2900,
+    typicalPainPoints: [
+      'Sem catálogo de encomendas de bolos, doces e salgados',
+      'Sem cardápio digital de café da manhã e lanches',
+      'Perde pedidos corporativos para café da tarde e eventos',
+      'Sem botão de encomendas online'
+    ]
+  },
+  {
+    id: 'roupas',
+    name: 'Loja de Roupas, Calçados & Moda',
+    icon: 'ShoppingBag',
+    osmFilter: 'shop=clothes|shop=shoes|shop=boutique|shop=fashion',
+    keywords: ['Loja de Roupas', 'Boutique', 'Calçados', 'Moda Feminina', 'Moda Masculina', 'Acessórios'],
+    avgTicket: 220,
+    estMonthlyLoss: 4100,
+    typicalPainPoints: [
+      'Depende exclusivamente do feed do Instagram para mostrar estoque',
+      'Sem catálogo de fotos organizado com tabela de tamanhos e preços',
+      'Perde vendas fora do horário de atendimento do direct',
+      'Sem vitrine virtual com link direto para o WhatsApp'
+    ]
+  },
+  {
+    id: 'hamburgueria',
+    name: 'Hamburgueria, Lanchonete & Pizzaria',
+    icon: 'Pizza',
+    osmFilter: 'amenity=fast_food|amenity=restaurant|shop=pizza',
+    keywords: ['Hamburgueria', 'Lanchonete', 'Pizzaria', 'Lanches', 'Açaí', 'Delivery'],
+    avgTicket: 85,
+    estMonthlyLoss: 4500,
+    typicalPainPoints: [
+      'Altas comissões em aplicativos de entrega (iFood)',
+      'Sem cardápio próprio interativo com carrinho WhatsApp',
+      'Sem programa de fidelidade online',
+      'Cardápio em imagem ruim no Instagram'
+    ]
+  },
+  {
+    id: 'bar',
+    name: 'Bar, Pub & Distribuidora de Bebidas',
+    icon: 'Beer',
+    osmFilter: 'amenity=bar|amenity=pub|shop=beverages|shop=alcohol',
+    keywords: ['Bar', 'Pub', 'Distribuidora de Bebidas', 'Chopp', 'Adega', 'Petiscaria'],
+    avgTicket: 110,
+    estMonthlyLoss: 3200,
+    typicalPainPoints: [
+      'Sem página para reserva de mesas, aniversários e eventos',
+      'Sem programação musical e cardápio de drinks atualizado',
+      'Perde pedidos para festas e churrascos da região',
+      'Sem integração de catálogo para entrega rápida de bebidas'
+    ]
+  },
+  {
+    id: 'lavarapido',
+    name: 'Lava Rápido, Estética Automotiva & Borracharia',
+    icon: 'Car',
+    osmFilter: 'amenity=car_wash|shop=tyres',
+    keywords: ['Lava Rápido', 'Estética Automotiva', 'Vitrificação', 'Borracharia', 'Polimento'],
+    avgTicket: 180,
+    estMonthlyLoss: 2700,
+    typicalPainPoints: [
+      'Sem agendamento online de horários para lavagem e polimento',
+      'Sem tabela visual de pacotes de estética e higienização',
+      'Não transmite credibilidade para donos de carros premium',
+      'Perde motoristas de aplicativo e frotas corporativas'
     ]
   },
   {

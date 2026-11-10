@@ -32,6 +32,8 @@ export interface Lead {
   opportunityScore: number; // 0 to 100
   estimatedMonthlyLoss: number; // ex: R$ 3.500/mês
   missingFeatures: string[];
+  closingHours?: string; // ex: Fecha às 19:00 ou Seg-Sáb 08:00-19:00
+  isOpenNow?: boolean;
   googleMapsUrl?: string;
   createdAt: string;
   contactedAt?: string;

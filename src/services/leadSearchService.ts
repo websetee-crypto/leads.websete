@@ -251,6 +251,8 @@ async function fetchFromOverpassAPI(
     const suburb = tags['addr:suburb'] || tags['addr:district'] || '';
     const address = `${street}${houseNumber}${suburb ? ' - ' + suburb : ''}, ${cityName} - ${state.code}`;
 
+    const closingHours = formatBusinessClosingHours(tags['opening_hours'] || '', niche.id);
+
     leads.push({
       id: `osm-${el.id || i}-${Date.now()}`,
       name: rawName,
@@ -274,6 +276,8 @@ async function fetchFromOverpassAPI(
       opportunityScore,
       estimatedMonthlyLoss: niche.estMonthlyLoss + Math.floor(Math.random() * 1500),
       missingFeatures: niche.typicalPainPoints,
+      closingHours,
+      isOpenNow: true,
       googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(rawName + ' ' + cityName)}`,
       createdAt: new Date().toISOString()
     });
@@ -338,6 +342,7 @@ async function fetchFromGooglePlacesAPI(
     const rating = p.rating || 4.5;
     const reviewsCount = p.userRatingCount || 20;
     const opportunityScore = calculateOpportunityScore(websiteStatus, rating, reviewsCount, Boolean(phone));
+    const closingHours = formatBusinessClosingHours('', niche.id);
 
     return {
       id: `google-${p.id || idx}`,
@@ -362,6 +367,8 @@ async function fetchFromGooglePlacesAPI(
       opportunityScore,
       estimatedMonthlyLoss: niche.estMonthlyLoss,
       missingFeatures: niche.typicalPainPoints,
+      closingHours,
+      isOpenNow: true,
       googleMapsUrl: p.googleMapsUri || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + cityName)}`,
       createdAt: new Date().toISOString()
     };
@@ -423,6 +430,7 @@ function generateRealisticLeads(
     const address = `${street}, ${number} - ${city}, ${state.code} - ${country.name}`;
 
     const opportunityScore = calculateOpportunityScore(websiteStatus, rating, reviewsCount, true);
+    const closingHours = formatBusinessClosingHours('', niche.id);
 
     leads.push({
       id: `gen-${i}-${Date.now()}`,
@@ -447,6 +455,8 @@ function generateRealisticLeads(
       opportunityScore,
       estimatedMonthlyLoss: niche.estMonthlyLoss + Math.floor(Math.random() * 1800),
       missingFeatures: niche.typicalPainPoints,
+      closingHours,
+      isOpenNow: true,
       googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + city)}`,
       createdAt: new Date().toISOString()
     });
@@ -490,6 +500,47 @@ function generateFakePhone(countryCode: string, stateCode: string): string {
     return `+1 (${area}) ${p1}-${p2}`;
   }
   return `+55 (11) 98765-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+function formatBusinessClosingHours(rawHours: string, nicheId: string): string {
+  if (rawHours && rawHours.trim().length > 0) {
+    // If rawHours contains a closing hour pattern like "19:00" or "22:00"
+    const match = rawHours.match(/(\d{1,2}:\d{2})/g);
+    if (match && match.length > 1) {
+      const closing = match[match.length - 1];
+      return `Fecha às ${closing}`;
+    }
+    return rawHours.slice(0, 22);
+  }
+
+  // Realistic niche-based closing time
+  switch (nicheId) {
+    case 'restaurante':
+    case 'hamburgueria':
+      return 'Aberto • Fecha às 23:00';
+    case 'bar':
+      return 'Aberto • Fecha às 01:00';
+    case 'padaria':
+      return 'Aberto • Fecha às 20:30';
+    case 'farmacia':
+      return 'Aberto • Fecha às 22:00 (Plantão)';
+    case 'dentista':
+    case 'estetica':
+    case 'advocacia':
+      return 'Aberto • Fecha às 18:30';
+    case 'academia':
+      return 'Aberto • Fecha às 22:00';
+    case 'oficina':
+    case 'lavarapido':
+    case 'construcao':
+      return 'Aberto • Fecha às 18:00';
+    case 'roupas':
+    case 'pet':
+    case 'salao':
+    case 'todos_comercios':
+    default:
+      return 'Aberto • Fecha às 19:00';
+  }
 }
 
 function slugify(text: string): string {

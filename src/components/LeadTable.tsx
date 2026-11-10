@@ -172,6 +172,11 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                     <div className="text-[11px] text-slate-500 truncate max-w-xs mt-0.5">
                       {lead.address}
                     </div>
+                    {lead.closingHours && (
+                      <div className="text-[10px] text-emerald-400 font-semibold mt-0.5">
+                        🕒 {lead.closingHours}
+                      </div>
+                    )}
                   </td>
 
                   {/* Website Status */}
@@ -201,22 +206,55 @@ export const LeadTable: React.FC<LeadTableProps> = ({
 
                   {/* Phone & WhatsApp */}
                   <td className="p-3.5 whitespace-nowrap">
-                    <div className="text-xs font-mono text-slate-300">
-                      {lead.phone || 'Não informado'}
-                    </div>
+                    {lead.phone ? (
+                      <div className="space-y-1">
+                        <a
+                          href={`tel:${lead.phone.replace(/\D/g, '')}`}
+                          className="text-xs font-mono text-emerald-300 font-bold hover:underline block"
+                          title="Clique para ligar direto"
+                        >
+                          {lead.phone}
+                        </a>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-slate-500">Não informado</span>
+                    )}
                   </td>
 
                   {/* Actions */}
                   <td className="p-3.5 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end space-x-1.5">
-                      <button
-                        onClick={() => onOpenPitch(lead)}
-                        className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center space-x-1 transition shadow-sm"
-                        title="Enviar WhatsApp"
-                      >
-                        <MessageCircle className="w-3.5 h-3.5 fill-slate-950" />
-                        <span className="hidden lg:inline">WhatsApp</span>
-                      </button>
+                      {lead.phone ? (
+                        <>
+                          <a
+                            href={`https://wa.me/${(lead.whatsapp || lead.phone).replace(/\D/g, '').startsWith('55') ? (lead.whatsapp || lead.phone).replace(/\D/g, '') : '55' + (lead.whatsapp || lead.phone).replace(/\D/g, '')}?text=${encodeURIComponent(`Olá, tudo bem? Notei que a ${lead.name} tem ótimas avaliações em ${lead.city}, mas ainda não possui um site oficial para captar clientes do Google. Vocês têm interesse em criar uma página profissional?`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center space-x-1 transition shadow-sm"
+                            title="Chamar direto no WhatsApp"
+                          >
+                            <MessageCircle className="w-3.5 h-3.5 fill-slate-950" />
+                            <span className="hidden lg:inline">WhatsApp</span>
+                          </a>
+
+                          <a
+                            href={`tel:${lead.phone.replace(/\D/g, '')}`}
+                            className="p-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center transition shadow-sm"
+                            title="Ligar direto"
+                          >
+                            📞
+                          </a>
+                        </>
+                      ) : (
+                        <button
+                          onClick={() => onOpenPitch(lead)}
+                          className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center space-x-1 transition shadow-sm"
+                          title="Abrir Pitch de Vendas"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 fill-slate-950" />
+                          <span className="hidden lg:inline">Pitch</span>
+                        </button>
+                      )}
 
                       <button
                         onClick={() => onOpenAudit(lead)}
