@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Globe, MessageCircle, MapPin, Star, Flame,
-  ExternalLink, Copy, Check, ShieldAlert, Kanban, Eye, AlertCircle,
+  Instagram, ExternalLink, Copy, Check, ShieldAlert, Kanban, Eye, AlertCircle,
   Clock, PhoneCall, Sparkles
 } from 'lucide-react';
 import { Lead } from '../types';
@@ -162,13 +162,29 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           ) : null}
         </div>
 
-        {/* Detected URL if any */}
-        {lead.detectedUrl && (
-          <div className="text-[11px] text-slate-500 mb-2 truncate flex items-center space-x-1">
-            <Globe className="w-3 h-3 text-slate-600" />
-            <span className="text-slate-400">URL:</span>
-            <span className="text-slate-500 truncate">{lead.detectedUrl}</span>
-          </div>
+        {/* Direct Instagram Link Box */}
+        {lead.instagramUrl && (
+          <a
+            href={lead.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gradient-to-r from-pink-950/40 via-purple-950/30 to-indigo-950/40 hover:from-pink-900/50 hover:to-indigo-900/50 border border-pink-500/30 hover:border-pink-500/60 rounded-xl p-2.5 mb-2 flex items-center justify-between text-xs text-pink-300 transition group/insta"
+            title="Clique para abrir o Instagram oficial da empresa"
+          >
+            <div className="flex items-center space-x-1.5 truncate">
+              <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white shrink-0">
+                <Instagram className="w-3 h-3" />
+              </div>
+              <span className="text-slate-300 font-semibold truncate">
+                {lead.instagramUrl.replace('https://www.instagram.com/', '@').replace('https://instagram.com/', '@').replace(/\/$/, '')}
+              </span>
+            </div>
+
+            <span className="text-[10px] font-bold text-pink-300 bg-pink-500/20 px-2 py-0.5 rounded-full flex items-center space-x-0.5 shrink-0 ml-1 group-hover/insta:bg-pink-500/30">
+              <span>Abrir Perfil</span>
+              <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
+            </span>
+          </a>
         )}
       </div>
 
@@ -212,7 +228,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Secondary Tool Buttons */}
-        <div className="grid grid-cols-4 gap-1.5 pt-1">
+        <div className="grid grid-cols-5 gap-1.5 pt-1">
           
           {/* Pitch Editor Modal Button */}
           <button
@@ -234,6 +250,28 @@ export const LeadCard: React.FC<LeadCardProps> = ({
             <span className="hidden sm:inline">Auditoria</span>
           </button>
 
+          {/* Instagram Button */}
+          <a
+            href={lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir Instagram"
+            className="p-2 rounded-xl bg-gradient-to-tr from-pink-900/30 to-purple-900/30 hover:from-pink-800/50 hover:to-purple-800/50 text-pink-300 text-xs font-semibold flex items-center justify-center border border-pink-500/30 transition"
+          >
+            <Instagram className="w-3.5 h-3.5 text-pink-400" />
+          </a>
+
+          {/* Google Maps link */}
+          <a
+            href={lead.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.name + ' ' + lead.city)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Abrir no Google Maps"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center border border-slate-700 transition"
+          >
+            <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+          </a>
+
           {/* CRM Toggle */}
           <button
             onClick={() => onToggleCrm(lead)}
@@ -245,16 +283,6 @@ export const LeadCard: React.FC<LeadCardProps> = ({
             }`}
           >
             <Kanban className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="hidden sm:inline">{isSavedInCrm ? 'No CRM' : 'Salvar'}</span>
-          </button>
-
-          {/* Copy Info */}
-          <button
-            onClick={copyQuickInfo}
-            title="Copiar dados do Lead"
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center border border-slate-700 transition"
-          >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
           </button>
 
         </div>

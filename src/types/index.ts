@@ -24,6 +24,7 @@ export interface Lead {
   reviewsCount?: number;
   websiteStatus: WebsiteStatus;
   detectedUrl?: string; // ex: instagram.com/loja ou vazio
+  instagramUrl?: string; // URL direta do Instagram
   lat: number;
   lng: number;
   source: 'openstreetmap' | 'google_places' | 'smart_generator' | 'imported';

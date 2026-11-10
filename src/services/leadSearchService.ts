@@ -243,8 +243,19 @@ async function fetchFromOverpassAPI(
 
     const rawWebsite = tags['website'] || tags['contact:website'] || tags['url'] || '';
     const rawPhone = tags['phone'] || tags['contact:phone'] || tags['mobile'] || tags['contact:mobile'] || tags['phone:mobile'] || tags['whatsapp'] || tags['contact:whatsapp'] || tags['telephone'] || tags['tel'] || '';
-    const rawInstagram = tags['contact:instagram'] || tags['instagram'] || '';
+    const rawInstagram = tags['contact:instagram'] || tags['instagram'] || tags['social:instagram'] || '';
     const rawFacebook = tags['contact:facebook'] || tags['facebook'] || '';
+
+    let instagramUrl: string | undefined = undefined;
+    if (rawInstagram) {
+      const cleanHandle = rawInstagram.replace('@', '').replace('https://instagram.com/', '').replace('https://www.instagram.com/', '').replace(/\/$/, '');
+      instagramUrl = `https://www.instagram.com/${cleanHandle}/`;
+    } else if (rawWebsite && rawWebsite.includes('instagram.com')) {
+      instagramUrl = rawWebsite.startsWith('http') ? rawWebsite : `https://${rawWebsite}`;
+    } else {
+      const slug = slugify(rawName);
+      instagramUrl = `https://www.instagram.com/${slug}/`;
+    }
 
     // Classify website status
     let websiteStatus: WebsiteStatus = 'NO_WEBSITE';
@@ -260,9 +271,10 @@ async function fetchFromOverpassAPI(
       }
     } else if (rawInstagram || rawFacebook) {
       websiteStatus = 'SOCIAL_ONLY';
-      detectedUrl = rawInstagram ? `https://instagram.com/${rawInstagram.replace('@', '')}` : rawFacebook;
+      detectedUrl = instagramUrl || rawFacebook;
     } else {
       websiteStatus = 'NO_WEBSITE';
+      detectedUrl = instagramUrl;
     }
 
     const rating = parseFloat((4.2 + (i % 8) * 0.1).toFixed(1));
@@ -294,6 +306,7 @@ async function fetchFromOverpassAPI(
       reviewsCount,
       websiteStatus,
       detectedUrl,
+      instagramUrl,
       lat: elLat,
       lng: elLng,
       source: 'openstreetmap',
@@ -368,6 +381,7 @@ async function fetchFromGooglePlacesAPI(
     const reviewsCount = p.userRatingCount || 20;
     const opportunityScore = calculateOpportunityScore(websiteStatus, rating, reviewsCount, Boolean(phone));
     const closingHours = formatBusinessClosingHours('', niche.id);
+    const instagramUrl = rawWebsite?.includes('instagram.com') ? rawWebsite : `https://www.instagram.com/${slugify(name)}/`;
 
     return {
       id: `google-${p.id || idx}`,
@@ -384,7 +398,8 @@ async function fetchFromGooglePlacesAPI(
       rating,
       reviewsCount,
       websiteStatus,
-      detectedUrl: rawWebsite || undefined,
+      detectedUrl: rawWebsite || instagramUrl,
+      instagramUrl,
       lat: p.location?.latitude || 0,
       lng: p.location?.longitude || 0,
       source: 'google_places' as const,
@@ -473,6 +488,7 @@ function generateRealisticLeads(
       reviewsCount,
       websiteStatus,
       detectedUrl,
+      instagramUrl: `https://www.instagram.com/${slugify(name)}/`,
       lat: baseLat + latOffset,
       lng: baseLng + lngOffset,
       source: 'smart_generator',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { 
-  Star, MessageCircle, Eye, Kanban, 
-  ArrowUpDown, CheckSquare, Square
+import {
+  Star, MessageCircle, Eye, Kanban,
+  ArrowUpDown, CheckSquare, Square, Instagram
 } from 'lucide-react';
 import { Lead } from '../types';
 
@@ -255,6 +255,16 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                           <span className="hidden lg:inline">Pitch</span>
                         </button>
                       )}
+
+                      <a
+                        href={lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-lg bg-gradient-to-tr from-pink-900/30 to-purple-900/30 hover:from-pink-800/50 hover:to-purple-800/50 text-pink-300 border border-pink-500/30 transition"
+                        title="Abrir Instagram"
+                      >
+                        <Instagram className="w-3.5 h-3.5 text-pink-400" />
+                      </a>
 
                       <button
                         onClick={() => onOpenAudit(lead)}
