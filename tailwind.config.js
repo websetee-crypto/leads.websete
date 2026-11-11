@@ -9,51 +9,32 @@ export default {
     extend: {
       colors: {
         dark: {
-          950: '#06080d',
-          900: '#0a0d14',
-          850: '#0e121b',
-          800: '#131824',
-          700: '#1c2333',
-          600: '#2b354c',
+          950: '#000000',
+          900: '#09090b',
+          850: '#121215',
+          800: '#18181b',
+          700: '#27272a',
+          600: '#3f3f46',
         },
         brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
-        },
-        cyan: {
-          400: '#22d3ee',
-          500: '#06b6d4',
-          600: '#0891b2',
-        },
-        emerald: {
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
+          50: '#fafafa',
+          100: '#f4f4f5',
+          200: '#e4e4e7',
+          300: '#d4d4d8',
+          400: '#a1a1aa',
+          500: '#ffffff',
+          600: '#e4e4e7',
+          700: '#d4d4d8',
+          800: '#27272a',
+          900: '#18181b',
+          950: '#09090b',
         }
       },
       boxShadow: {
-        'glow-brand': '0 0 25px -5px rgba(99, 102, 241, 0.25)',
-        'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.25)',
-        'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.25)',
+        'glow-white': '0 0 25px -5px rgba(255, 255, 255, 0.2)',
       },
       animation: {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'float': 'float 6s ease-in-out infinite',
-      },
-      keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-6px)' },
-        }
       }
     },
   },
