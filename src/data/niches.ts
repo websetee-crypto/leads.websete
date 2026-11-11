@@ -12,7 +12,7 @@ export interface NicheCategory {
 export const NICHES: NicheCategory[] = [
   {
     id: 'todos_comercios',
-    name: '🏬 Todo Tipo de Comércio & Negócios Locais',
+    name: '🌟 Todos (Todos os Nichos / Segmentos)',
     icon: 'Store',
     osmFilter: 'shop=yes|shop=supermarket|shop=clothes|shop=bakery|shop=hairdresser|shop=beauty|shop=car_repair|shop=convenience|shop=pet|amenity=restaurant|amenity=cafe|amenity=pharmacy|amenity=dentist|amenity=bar|craft=yes|office=yes',
     keywords: ['Comércio', 'Loja', 'Serviços', 'Empresa', 'Atendimento'],

@@ -268,7 +268,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                   : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'
               }`}
             >
-              {n.name.split('/')[0].replace('🏬 ', '')}
+              {n.id === 'todos_comercios' ? '🌟 Todos os Nichos' : n.name.split('/')[0].replace('🏬 ', '').replace('🌟 ', '')}
             </button>
           ))}
         </div>
