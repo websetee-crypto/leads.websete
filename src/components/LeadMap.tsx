@@ -65,10 +65,10 @@ export const LeadMap: React.FC<LeadMapProps> = ({
         >
           <MapRecenter center={defaultCenter} />
           
-          {/* Dark / Modern Map Tiles */}
+          {/* Dark / Modern Map Tiles with API Key */}
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_56l4_1_afedf8c3415a5b372e6eb0f0"
           />
 
           {leads.map((lead) => {
