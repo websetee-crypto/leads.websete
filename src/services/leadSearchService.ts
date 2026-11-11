@@ -161,6 +161,12 @@ async function getCoordinatesForCity(
   return defaultCenter;
 }
 
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+];
+
 async function fetchFromOverpassAPI(
   country: typeof COUNTRIES[0],
   state: typeof COUNTRIES[0]['states'][0],
@@ -168,60 +174,77 @@ async function fetchFromOverpassAPI(
   niche: typeof NICHES[0],
   apiSettings: ApiSettings
 ): Promise<Lead[]> {
-  const endpoint = apiSettings.overpassCustomEndpoint || 'https://overpass-api.de/api/interpreter';
+  const endpoints = apiSettings.overpassCustomEndpoint
+    ? [apiSettings.overpassCustomEndpoint, ...OVERPASS_ENDPOINTS]
+    : OVERPASS_ENDPOINTS;
 
   // Get precise coordinates for city
   const [lat, lon] = await getCoordinatesForCity(cityName, state.name, country.name, state.center);
 
-  // Search radius in meters (22km around city center)
-  const radius = 22000;
+  // Search radius in meters (18km around city center)
+  const radius = 18000;
 
   let tagQueries = '';
   if (niche.id === 'todos_comercios') {
-    // Broad scan covering ALL commerce types
+    // Fast, ultra-responsive named commerce scan
     tagQueries = `
-      node["shop"](around:${radius},${lat},${lon});
-      way["shop"](around:${radius},${lat},${lon});
-      node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|dentist|beauty_salon|clinic|veterinary|car_wash|car_repair|bakers"](around:${radius},${lat},${lon});
-      way["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|dentist|beauty_salon|clinic|veterinary|car_wash|car_repair|bakers"](around:${radius},${lat},${lon});
-      node["craft"](around:${radius},${lat},${lon});
-      node["office"](around:${radius},${lat},${lon});
+      node["shop"]["name"](around:${radius},${lat},${lon});
+      node["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|dentist|beauty_salon|clinic|veterinary|car_wash|car_repair"]["name"](around:${radius},${lat},${lon});
+      node["craft"]["name"](around:${radius},${lat},${lon});
+      node["office"]["name"](around:${radius},${lat},${lon});
+      way["shop"]["name"](around:${radius},${lat},${lon});
+      way["amenity"~"restaurant|cafe|fast_food|bar|pub|pharmacy|dentist|beauty_salon|clinic|veterinary|car_wash|car_repair"]["name"](around:${radius},${lat},${lon});
     `;
   } else {
     const tags = niche.osmFilter.split('|');
     tagQueries = tags.map((t) => {
       const [k, v] = t.split('=');
-      return `node["${k}"="${v}"](around:${radius},${lat},${lon});way["${k}"="${v}"](around:${radius},${lat},${lon});`;
+      return `node["${k}"="${v}"]["name"](around:${radius},${lat},${lon});way["${k}"="${v}"]["name"](around:${radius},${lat},${lon});`;
     }).join('');
   }
 
   const query = `
-    [out:json][timeout:15];
+    [out:json][timeout:12];
     (
       ${tagQueries}
     );
-    out center 60;
+    out center 70;
   `;
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  let lastError: Error | null = null;
+  let data: any = null;
 
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-    },
-    body: `data=${encodeURIComponent(query)}`,
-    signal: controller.signal
-  });
+  for (const endpoint of endpoints) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-  clearTimeout(timeoutId);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        },
+        body: `data=${encodeURIComponent(query)}`,
+        signal: controller.signal
+      });
 
-  if (!response.ok) {
-    throw new Error('Overpass API returned status ' + response.status);
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        data = await response.json();
+        if (data && data.elements && data.elements.length > 0) {
+          break;
+        }
+      }
+    } catch (e: any) {
+      lastError = e;
+    }
   }
 
-  const data = await response.json();
+  if (!data || !data.elements || data.elements.length === 0) {
+    throw lastError || new Error('Nenhum resultado direto via OSM para esta consulta específica.');
+  }
+
   const elements = data.elements || [];
 
   if (elements.length === 0) {
