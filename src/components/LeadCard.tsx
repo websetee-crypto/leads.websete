@@ -194,26 +194,40 @@ export const LeadCard: React.FC<LeadCardProps> = ({
                 <Instagram className="w-3.5 h-3.5" />
               </div>
               <div className="truncate">
-                <span className="text-zinc-400 font-medium text-[11px] block">Instagram / Perfil:</span>
+                <span className="text-zinc-400 font-medium text-[11px] block">
+                  {lead.instagramUrl ? 'Instagram Verificado:' : 'Instagram / Redes:'}
+                </span>
                 <span className="text-zinc-200 font-semibold truncate text-[11px]">
-                  {(lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`)
-                    .replace('https://www.instagram.com/', '@')
-                    .replace('https://instagram.com/', '@')
-                    .replace(/\/$/, '')}
+                  {lead.instagramUrl
+                    ? lead.instagramUrl.replace('https://www.instagram.com/', '@').replace('https://instagram.com/', '@').replace(/\/$/, '')
+                    : 'Buscar Perfil Oficial'}
                 </span>
               </div>
             </div>
 
-            <a
-              href={lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] font-extrabold text-black bg-white hover:bg-zinc-200 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
-              title="Abrir perfil no Instagram"
-            >
-              <span>Abrir</span>
-              <ExternalLink className="w-3 h-3 ml-0.5" />
-            </a>
+            {lead.instagramUrl ? (
+              <a
+                href={lead.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-extrabold text-black bg-white hover:bg-zinc-200 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
+                title="Abrir perfil verificado no Instagram"
+              >
+                <span>Abrir</span>
+                <ExternalLink className="w-3 h-3 ml-0.5" />
+              </a>
+            ) : (
+              <a
+                href={`https://www.google.com/search?q=${encodeURIComponent('instagram ' + lead.name + ' ' + lead.city)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[11px] font-bold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 transition"
+                title="Buscar perfil oficial no Instagram"
+              >
+                <Search className="w-3 h-3" />
+                <span>Buscar @</span>
+              </a>
+            )}
           </div>
 
         </div>
@@ -296,13 +310,13 @@ export const LeadCard: React.FC<LeadCardProps> = ({
 
           {/* Instagram Button */}
           <a
-            href={lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`}
+            href={lead.instagramUrl || `https://www.google.com/search?q=${encodeURIComponent('instagram ' + lead.name + ' ' + lead.city)}`}
             target="_blank"
             rel="noopener noreferrer"
-            title="Abrir Instagram"
-            className="p-2.5 rounded-2xl bg-gradient-to-tr from-pink-950/40 to-purple-950/40 hover:from-pink-900/60 hover:to-purple-900/60 text-pink-300 text-xs font-bold flex items-center justify-center border border-pink-500/30 hover:border-pink-500/60 transition"
+            title={lead.instagramUrl ? 'Abrir Instagram Verificado' : 'Buscar Instagram Oficial no Google'}
+            className="p-2.5 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-bold flex items-center justify-center border border-zinc-800 hover:border-zinc-600 transition"
           >
-            <Instagram className="w-3.5 h-3.5 text-pink-400" />
+            <Instagram className="w-3.5 h-3.5 text-zinc-300" />
           </a>
 
           {/* Google Maps link */}

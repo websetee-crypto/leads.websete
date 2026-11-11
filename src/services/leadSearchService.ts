@@ -277,8 +277,8 @@ async function fetchFromOverpassAPI(
     } else if (rawWebsite && rawWebsite.includes('instagram.com')) {
       instagramUrl = rawWebsite.startsWith('http') ? rawWebsite : `https://${rawWebsite}`;
     } else {
-      const slug = slugify(rawName);
-      instagramUrl = `https://www.instagram.com/${slug}/`;
+      // Do NOT guess fake URLs; keep undefined if not verified
+      instagramUrl = undefined;
     }
 
     // Classify website status
@@ -485,15 +485,13 @@ function generateRealisticLeads(
 
     const rating = parseFloat((4.0 + Math.random() * 1.0).toFixed(1));
     const reviewsCount = Math.floor(12 + Math.random() * 240);
-    const phone = generateFakePhone(country.code, state.code);
-    const whatsapp = phone.replace(/\D/g, '');
 
     const streets = country.code === 'PT' ? STREET_NAMES_PT : (country.code === 'US' ? STREET_NAMES_US : STREET_NAMES_BR);
     const street = streets[i % streets.length];
     const number = Math.floor(40 + Math.random() * 2100);
     const address = `${street}, ${number} - ${city}, ${state.code} - ${country.name}`;
 
-    const opportunityScore = calculateOpportunityScore(websiteStatus, rating, reviewsCount, true);
+    const opportunityScore = calculateOpportunityScore(websiteStatus, rating, reviewsCount, false);
     const closingHours = formatBusinessClosingHours('', niche.id);
 
     leads.push({
@@ -506,13 +504,13 @@ function generateRealisticLeads(
       state: state.name,
       city,
       address,
-      phone,
-      whatsapp,
+      phone: undefined,
+      whatsapp: undefined,
       rating,
       reviewsCount,
       websiteStatus,
       detectedUrl,
-      instagramUrl: `https://www.instagram.com/${slugify(name)}/`,
+      instagramUrl: undefined,
       lat: baseLat + latOffset,
       lng: baseLng + lngOffset,
       source: 'smart_generator',
