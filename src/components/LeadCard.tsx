@@ -35,11 +35,14 @@ export const LeadCard: React.FC<LeadCardProps> = ({
     const defaultPitch = `Olá, tudo bem? Notei que a ${lead.name} tem ótimas avaliações em ${lead.city}, mas ainda não possui um site oficial ou landing page para captar clientes do Google. Vocês têm interesse em criar uma página profissional de alta conversão?`;
     const encoded = encodeURIComponent(defaultPitch);
     
-    if (cleanPhone) {
+    // Check if phone exists and is not a synthetic test phone
+    if (cleanPhone && cleanPhone.length >= 10 && !cleanPhone.includes('5500') && !cleanPhone.includes('9999')) {
       const fullNum = cleanPhone.startsWith('55') || cleanPhone.startsWith('351') || cleanPhone.startsWith('1') ? cleanPhone : '55' + cleanPhone;
       window.open(`https://wa.me/${fullNum}?text=${encoded}`, '_blank');
     } else {
-      onOpenPitch(lead);
+      // If synthetic or missing phone, open Google search for the direct WhatsApp/phone of this business
+      const query = encodeURIComponent(`whatsapp ${lead.name} ${lead.city} telefone`);
+      window.open(`https://www.google.com/search?q=${query}`, '_blank');
     }
   };
 
