@@ -124,68 +124,104 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           <span className="line-clamp-2">{lead.address}</span>
         </div>
 
-        {/* Direct Contact Phone Box */}
-        <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-2.5 mb-2 flex items-center justify-between text-xs">
-          <div className="flex items-center space-x-1.5 truncate">
-            <PhoneCall className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="text-slate-400 font-medium">Telefone:</span>
+        {/* Contact Channels Grid: WhatsApp, Telefone & Instagram */}
+        <div className="space-y-1.5 mb-2">
+          
+          {/* 1. WhatsApp Box */}
+          <div className="bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/30 rounded-xl p-2 flex items-center justify-between text-xs transition">
+            <div className="flex items-center space-x-2 truncate">
+              <div className="w-5 h-5 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                <MessageCircle className="w-3.5 h-3.5 fill-emerald-400" />
+              </div>
+              <div className="truncate">
+                <span className="text-slate-400 font-medium text-[11px] block">WhatsApp:</span>
+                <span className="font-mono text-emerald-300 font-bold truncate">
+                  {lead.phone || lead.whatsapp || 'Disponível no Google'}
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleDirectWhatsApp}
+              className="text-[11px] font-extrabold text-emerald-950 bg-emerald-400 hover:bg-emerald-300 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
+              title="Abrir WhatsApp com pitch"
+            >
+              <span>Chamar</span>
+              <ExternalLink className="w-3 h-3 ml-0.5" />
+            </button>
+          </div>
+
+          {/* 2. Telefone Box */}
+          <div className="bg-blue-950/30 hover:bg-blue-950/50 border border-blue-500/30 rounded-xl p-2 flex items-center justify-between text-xs transition">
+            <div className="flex items-center space-x-2 truncate">
+              <div className="w-5 h-5 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+                <PhoneCall className="w-3.5 h-3.5" />
+              </div>
+              <div className="truncate">
+                <span className="text-slate-400 font-medium text-[11px] block">Telefone Fixo / Celular:</span>
+                {lead.phone ? (
+                  <span className="font-mono text-blue-300 font-bold truncate">
+                    {lead.phone}
+                  </span>
+                ) : (
+                  <span className="text-slate-400 text-[11px] truncate">
+                    Ver ficha no Maps
+                  </span>
+                )}
+              </div>
+            </div>
+
             {lead.phone ? (
               <a
                 href={`tel:${lead.phone.replace(/\D/g, '')}`}
-                className="font-mono text-emerald-300 font-bold hover:underline truncate"
-                title="Clique para ligar direto agora"
+                className="text-[11px] font-extrabold text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
+                title="Ligar agora"
               >
-                {lead.phone}
+                <span>Ligar</span>
               </a>
             ) : (
               <a
                 href={lead.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.name + ' ' + lead.city)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand-400 hover:text-brand-300 font-medium underline flex items-center space-x-1"
-                title="Buscar telefone e WhatsApp no Google Maps"
+                className="text-[11px] font-bold text-blue-300 bg-blue-500/20 hover:bg-blue-500/30 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 transition"
+                title="Buscar no Google Maps"
               >
-                <span>Buscar no Google</span>
-                <ExternalLink className="w-3 h-3" />
+                <span>Maps ↗</span>
               </a>
             )}
           </div>
 
-          {lead.phone ? (
-            <a
-              href={`tel:${lead.phone.replace(/\D/g, '')}`}
-              className="text-[10px] font-bold text-emerald-300 bg-emerald-500/20 hover:bg-emerald-500/30 px-2 py-0.5 rounded border border-emerald-500/30 shrink-0 ml-1 transition"
-              title="Ligar direto"
-            >
-              📞 Ligar
-            </a>
-          ) : null}
-        </div>
-
-        {/* Direct Instagram Link Box */}
-        {lead.instagramUrl && (
-          <a
-            href={lead.instagramUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-gradient-to-r from-pink-950/40 via-purple-950/30 to-indigo-950/40 hover:from-pink-900/50 hover:to-indigo-900/50 border border-pink-500/30 hover:border-pink-500/60 rounded-xl p-2.5 mb-2 flex items-center justify-between text-xs text-pink-300 transition group/insta"
-            title="Clique para abrir o Instagram oficial da empresa"
-          >
-            <div className="flex items-center space-x-1.5 truncate">
+          {/* 3. Instagram Box */}
+          <div className="bg-gradient-to-r from-pink-950/40 via-purple-950/30 to-indigo-950/40 hover:from-pink-900/50 hover:to-indigo-900/50 border border-pink-500/30 rounded-xl p-2 flex items-center justify-between text-xs transition">
+            <div className="flex items-center space-x-2 truncate">
               <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white shrink-0">
-                <Instagram className="w-3 h-3" />
+                <Instagram className="w-3.5 h-3.5" />
               </div>
-              <span className="text-slate-300 font-semibold truncate">
-                {lead.instagramUrl.replace('https://www.instagram.com/', '@').replace('https://instagram.com/', '@').replace(/\/$/, '')}
-              </span>
+              <div className="truncate">
+                <span className="text-slate-400 font-medium text-[11px] block">Instagram:</span>
+                <span className="text-pink-300 font-semibold truncate">
+                  {(lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`)
+                    .replace('https://www.instagram.com/', '@')
+                    .replace('https://instagram.com/', '@')
+                    .replace(/\/$/, '')}
+                </span>
+              </div>
             </div>
 
-            <span className="text-[10px] font-bold text-pink-300 bg-pink-500/20 px-2 py-0.5 rounded-full flex items-center space-x-0.5 shrink-0 ml-1 group-hover/insta:bg-pink-500/30">
-              <span>Abrir Perfil</span>
-              <ExternalLink className="w-2.5 h-2.5 ml-0.5" />
-            </span>
-          </a>
-        )}
+            <a
+              href={lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-extrabold text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
+              title="Abrir perfil no Instagram"
+            >
+              <span>Abrir</span>
+              <ExternalLink className="w-3 h-3 ml-0.5" />
+            </a>
+          </div>
+
+        </div>
       </div>
 
       {/* Bottom Action Buttons */}
