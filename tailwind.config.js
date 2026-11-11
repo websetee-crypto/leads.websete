@@ -8,6 +8,14 @@ export default {
   theme: {
     extend: {
       colors: {
+        dark: {
+          950: '#06080d',
+          900: '#0a0d14',
+          850: '#0e121b',
+          800: '#131824',
+          700: '#1c2333',
+          600: '#2b354c',
+        },
         brand: {
           50: '#eef2ff',
           100: '#e0e7ff',
@@ -21,13 +29,31 @@ export default {
           900: '#312e81',
           950: '#1e1b4b',
         },
+        cyan: {
+          400: '#22d3ee',
+          500: '#06b6d4',
+          600: '#0891b2',
+        },
         emerald: {
+          400: '#34d399',
           500: '#10b981',
           600: '#059669',
         }
       },
+      boxShadow: {
+        'glow-brand': '0 0 25px -5px rgba(99, 102, 241, 0.25)',
+        'glow-emerald': '0 0 25px -5px rgba(16, 185, 129, 0.25)',
+        'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.25)',
+      },
       animation: {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 6s ease-in-out infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        }
       }
     },
   },

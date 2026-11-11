@@ -46,80 +46,80 @@ export const LeadCard: React.FC<LeadCardProps> = ({
   const formattedLoss = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(lead.estimatedMonthlyLoss);
 
   return (
-    <div className={`bg-slate-900 border rounded-2xl p-4 sm:p-5 transition-all duration-200 relative group flex flex-col justify-between ${
-      lead.opportunityScore >= 85 
-        ? 'border-amber-500/30 hover:border-amber-500/60 shadow-lg shadow-amber-500/5' 
-        : 'border-slate-800 hover:border-slate-700 shadow-md'
+    <div className={`glass-card rounded-3xl p-5 sm:p-6 transition-all duration-300 relative group flex flex-col justify-between hover:-translate-y-1 ${
+      lead.opportunityScore >= 85
+        ? 'border-amber-500/30 hover:border-amber-400/60 shadow-xl shadow-amber-500/5 hover:shadow-amber-500/15'
+        : 'border-white/[0.08] hover:border-brand-500/50 shadow-xl'
     }`}>
       
       {/* Top Header: Category & Opportunity Score */}
       <div>
-        <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start justify-between gap-2 mb-3">
           
           {/* Status Badge & Real Source Badge */}
           <div className="flex flex-wrap items-center gap-1.5">
             {getStatusBadge(lead.websiteStatus)}
             {lead.source === 'openstreetmap' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-300 border border-blue-500/30" title="Estabelecimento Real Verificado no OpenStreetMap">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 shadow-sm shadow-cyan-500/10" title="Estabelecimento Real Verificado no OpenStreetMap">
                 🌐 Real (OSM)
               </span>
             )}
             {lead.source === 'google_places' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30" title="Estabelecimento Real Verificado no Google Places">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 shadow-sm shadow-emerald-500/10" title="Estabelecimento Real Verificado no Google Places">
                 ⭐ Real (Google)
               </span>
             )}
             {lead.source === 'smart_generator' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700" title="Dado sintético para testes">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-dark-950 text-slate-400 border border-white/[0.08]" title="Dado sintético para testes">
                 🤖 Demonstração
               </span>
             )}
           </div>
 
           {/* Opportunity Score Pill */}
-          <div className={`flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-extrabold ${
+          <div className={`flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-black shadow-inner ${
             lead.opportunityScore >= 85
-              ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-amber-500/10'
               : lead.opportunityScore >= 70
-              ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
-              : 'bg-slate-800 text-slate-300'
+              ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 shadow-emerald-500/10'
+              : 'bg-dark-950 text-slate-300 border border-white/[0.08]'
           }`} title="Score de Oportunidade para Venda de Site / Landing Page">
-            <Flame className="w-3.5 h-3.5 text-amber-400" />
+            <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
             <span>Score {lead.opportunityScore}%</span>
           </div>
 
         </div>
 
         {/* Business Name */}
-        <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-brand-300 transition line-clamp-1">
+        <h3 className="text-lg font-black text-white group-hover:text-cyan-300 transition-colors duration-200 line-clamp-1 tracking-tight">
           {lead.name}
         </h3>
 
         {/* Category & Location */}
-        <p className="text-xs font-semibold text-brand-400 mb-2">
+        <p className="text-xs font-bold text-brand-400 mb-3 uppercase tracking-wider">
           {lead.category}
         </p>
 
         {/* Rating, Reviews & Loss */}
-        <div className="flex items-center space-x-2 text-xs text-slate-300 mb-2 bg-slate-950/60 p-2 rounded-xl border border-slate-800/80">
-          <div className="flex items-center text-amber-400 font-bold">
+        <div className="flex items-center space-x-2 text-xs text-slate-300 mb-2.5 bg-dark-950/70 p-2.5 rounded-2xl border border-white/[0.06] shadow-inner">
+          <div className="flex items-center text-amber-400 font-black">
             <Star className="w-3.5 h-3.5 fill-amber-400 mr-1" />
             <span>{lead.rating || '4.8'}</span>
           </div>
           <span className="text-slate-600">•</span>
-          <span className="text-slate-400">({lead.reviewsCount || 24} avaliações)</span>
+          <span className="text-slate-400 font-medium">({lead.reviewsCount || 24} avaliações)</span>
           <span className="text-slate-600">•</span>
-          <span className="text-red-400 font-semibold text-[11px]">Perde ~{formattedLoss}/mês</span>
+          <span className="text-red-400 font-bold text-[11px]">Perde ~{formattedLoss}/mês</span>
         </div>
 
         {/* Closing Hours Badge */}
-        <div className="flex items-center space-x-1.5 text-xs text-emerald-400 font-medium mb-2 bg-emerald-950/20 border border-emerald-800/30 px-2.5 py-1 rounded-xl">
+        <div className="flex items-center space-x-2 text-xs text-emerald-400 font-bold mb-2.5 bg-emerald-950/30 border border-emerald-500/30 px-3 py-1.5 rounded-2xl shadow-sm">
           <Clock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
           <span className="truncate">{lead.closingHours || 'Aberto • Horário Comercial'}</span>
         </div>
 
         {/* Address */}
-        <div className="flex items-start space-x-2 text-xs text-slate-400 mb-2">
+        <div className="flex items-start space-x-2 text-xs text-slate-400 mb-3">
           <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
           <span className="line-clamp-2">{lead.address}</span>
         </div>
@@ -233,7 +233,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           {/* Direct WhatsApp Call */}
           <button
             onClick={handleDirectWhatsApp}
-            className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-extrabold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center space-x-1.5 shadow-md shadow-emerald-600/20 transition transform active:scale-[0.98]"
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 shadow-lg shadow-emerald-500/20 ring-1 ring-white/30 transition-all transform active:scale-[0.98] cursor-pointer"
             title="Abrir conversa direta no WhatsApp"
           >
             <MessageCircle className="w-4 h-4 fill-slate-950" />
@@ -244,7 +244,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           {lead.phone ? (
             <a
               href={`tel:${lead.phone.replace(/\D/g, '')}`}
-              className="bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center space-x-1.5 shadow-md shadow-blue-600/20 transition transform active:scale-[0.98]"
+              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 shadow-lg shadow-cyan-600/20 ring-1 ring-white/20 transition-all transform active:scale-[0.98]"
               title="Ligar agora para o estabelecimento"
             >
               <PhoneCall className="w-4 h-4" />
@@ -253,7 +253,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           ) : (
             <button
               onClick={() => onOpenPitch(lead)}
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs py-2.5 px-3 rounded-xl flex items-center justify-center space-x-1.5 border border-slate-700 transition"
+              className="bg-dark-850 hover:bg-dark-800 text-slate-200 font-bold text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 border border-white/[0.08] hover:border-white/20 transition"
               title="Ver Modelos de Pitch"
             >
               <Sparkles className="w-4 h-4 text-amber-400" />
@@ -270,7 +270,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           <button
             onClick={() => onOpenPitch(lead)}
             title="Modelos de Mensagem e Pitch"
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center space-x-1 border border-slate-700 transition"
+            className="p-2.5 rounded-2xl bg-dark-850 hover:bg-dark-800 text-slate-300 text-xs font-bold flex items-center justify-center space-x-1 border border-white/[0.08] hover:border-white/20 transition cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">Pitch</span>
@@ -280,9 +280,9 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           <button
             onClick={() => onOpenAudit(lead)}
             title="Ver Auditoria de Falhas & Argumentos de Vendas"
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center space-x-1 border border-slate-700 transition"
+            className="p-2.5 rounded-2xl bg-dark-850 hover:bg-dark-800 text-slate-300 text-xs font-bold flex items-center justify-center space-x-1 border border-white/[0.08] hover:border-white/20 transition cursor-pointer"
           >
-            <Eye className="w-3.5 h-3.5 text-brand-400" />
+            <Eye className="w-3.5 h-3.5 text-cyan-400" />
             <span className="hidden sm:inline">Auditoria</span>
           </button>
 
@@ -292,7 +292,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             title="Abrir Instagram"
-            className="p-2 rounded-xl bg-gradient-to-tr from-pink-900/30 to-purple-900/30 hover:from-pink-800/50 hover:to-purple-800/50 text-pink-300 text-xs font-semibold flex items-center justify-center border border-pink-500/30 transition"
+            className="p-2.5 rounded-2xl bg-gradient-to-tr from-pink-950/40 to-purple-950/40 hover:from-pink-900/60 hover:to-purple-900/60 text-pink-300 text-xs font-bold flex items-center justify-center border border-pink-500/30 hover:border-pink-500/60 transition"
           >
             <Instagram className="w-3.5 h-3.5 text-pink-400" />
           </a>
@@ -303,7 +303,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
             target="_blank"
             rel="noopener noreferrer"
             title="Abrir no Google Maps"
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center justify-center border border-slate-700 transition"
+            className="p-2.5 rounded-2xl bg-dark-850 hover:bg-dark-800 text-slate-300 text-xs font-bold flex items-center justify-center border border-white/[0.08] hover:border-white/20 transition"
           >
             <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
           </a>
@@ -312,13 +312,13 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           <button
             onClick={() => onToggleCrm(lead)}
             title={isSavedInCrm ? 'Salvo no CRM' : 'Adicionar ao Pipeline CRM'}
-            className={`p-2 rounded-xl text-xs font-semibold flex items-center justify-center space-x-1 border transition ${
+            className={`p-2.5 rounded-2xl text-xs font-bold flex items-center justify-center space-x-1 border transition cursor-pointer ${
               isSavedInCrm
-                ? 'bg-brand-600 text-white border-brand-500 shadow-sm'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                ? 'bg-gradient-to-r from-brand-600 to-indigo-600 text-white border-brand-400/50 shadow-md shadow-brand-500/20'
+                : 'bg-dark-850 hover:bg-dark-800 text-slate-300 border-white/[0.08] hover:border-white/20'
             }`}
           >
-            <Kanban className="w-3.5 h-3.5 text-indigo-400" />
+            <Kanban className="w-3.5 h-3.5 text-cyan-400" />
           </button>
 
         </div>
