@@ -22,27 +22,34 @@ export const Header: React.FC<HeaderProps> = ({
   leads
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-dark-950/80 backdrop-blur-2xl border-b border-white/[0.08] shadow-2xl shadow-black/40">
+    <header className="sticky top-0 z-40 bg-[#0c0d12] backdrop-blur-2xl border-b border-[#22242f] shadow-2xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
           
-          {/* Logo & Brand */}
+          {/* Web Sete Official Logo & Brand */}
           <div className="flex items-center space-x-3.5 cursor-pointer group" onClick={() => setActiveTab('search')}>
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-brand-500/30 ring-1 ring-white/30 group-hover:scale-105 transition-transform duration-300">
-              <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xl sm:text-2xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
-                  LeadSite<span className="bg-gradient-to-r from-brand-400 to-cyan-400 bg-clip-text text-transparent">Pro</span>
-                </span>
-                <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-brand-500/10 text-brand-300 border border-brand-500/30 shadow-sm shadow-brand-500/10">
-                  <Sparkles className="w-3 h-3 mr-1 text-cyan-400" /> Sem Site Scanner
+            {/* W7 Stylized Monogram */}
+            <div className="flex items-center space-x-2.5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white to-slate-200 flex items-center justify-center shadow-md ring-1 ring-white/30 group-hover:scale-105 transition-transform">
+                <svg viewBox="0 0 40 40" className="w-7 h-7 text-black fill-current" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 10 L12 28 L17 14 L22 28 L28 10 L24 10 L20 22 L16 11 L13 22 L9 10 Z" fill="#000000" />
+                  <path d="M26 10 L35 10 L30 28 L26 28 L30.5 13.5 L26 13.5 Z" fill="#000000" />
+                </svg>
+              </div>
+
+              <div className="flex flex-col">
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-lg sm:text-xl font-black tracking-widest text-white uppercase leading-none">
+                    WEB <span className="text-white">SETE</span>
+                  </span>
+                  <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black bg-white/10 text-slate-200 border border-white/20 uppercase tracking-wider">
+                    Leads & Radar
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-semibold tracking-wider uppercase mt-0.5">
+                  Área Interna • Prospecção
                 </span>
               </div>
-              <p className="hidden md:block text-[11px] text-slate-400 font-medium">
-                Varredura de empresas sem presença digital para prospecção ativa
-              </p>
             </div>
           </div>
 

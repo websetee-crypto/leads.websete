@@ -25,10 +25,10 @@ const DEFAULT_SETTINGS: ApiSettings = {
   googlePlacesApiKey: '',
   useCustomGooglePlaces: false,
   overpassCustomEndpoint: 'https://overpass-api.de/api/interpreter',
-  agencyName: 'Studio Web Pro',
-  agentName: 'Especialista Digital',
+  agencyName: 'Web Sete',
+  agentName: 'Equipe Web Sete',
   agentPhone: '(11) 98765-4321',
-  agentWebsite: 'www.studiowebpro.com.br'
+  agentWebsite: 'websete.com'
 };
 
 export const App: React.FC = () => {
