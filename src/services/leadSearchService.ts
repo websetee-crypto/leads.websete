@@ -1,6 +1,7 @@
 import { Lead, SearchFilterState, ApiSettings, WebsiteStatus } from '../types';
 import { COUNTRIES } from '../data/locations';
 import { NICHES } from '../data/niches';
+import { hasValidWhatsApp } from '../utils/phoneUtils';
 
 // Phone area codes by Brazilian State
 const DDD_BY_STATE: Record<string, string[]> = {
@@ -682,8 +683,12 @@ function applyPostFilters(leads: Lead[], filter: SearchFilterState): Lead[] {
     if (filter.statusFilter === 'SOCIAL_ONLY' && l.websiteStatus !== 'SOCIAL_ONLY') return false;
     if (filter.statusFilter === 'WITHOUT_ANY_SITE' && l.websiteStatus === 'HAS_WEBSITE') return false;
 
+    // WhatsApp filter
+    if (filter.whatsappFilter === 'WITH_WHATSAPP' && !hasValidWhatsApp(l)) return false;
+    if (filter.whatsappFilter === 'WITHOUT_WHATSAPP' && hasValidWhatsApp(l)) return false;
+
     // Phone filter
-    if (filter.onlyWithPhone && !l.phone) return false;
+    if (filter.onlyWithPhone && !l.phone && !l.whatsapp) return false;
 
     // Rating filter
     if (filter.minRating > 0 && (l.rating || 0) < filter.minRating) return false;

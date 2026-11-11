@@ -170,58 +170,57 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 
         </div>
 
-        {/* Secondary Row: Website Presence Filter & Quick Controls */}
+        {/* Secondary Row: Website Presence & WhatsApp Filters */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center pt-3 border-t border-zinc-800">
           
           {/* Website Status Specificity Filter */}
-          <div className="md:col-span-6 lg:col-span-5">
+          <div className="md:col-span-6 lg:col-span-4">
             <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
               <Filter className="w-3.5 h-3.5 text-white" />
-              <span>Status da Presença Digital:</span>
+              <span>Presença Digital:</span>
             </label>
             <select
               value={filters.statusFilter}
               onChange={(e) => setFilters((prev) => ({ ...prev, statusFilter: e.target.value as any }))}
-              className="w-full bg-black border border-zinc-800 hover:border-zinc-600 focus:border-white rounded-2xl px-4 py-3 text-xs sm:text-sm text-white font-bold outline-none transition cursor-pointer"
+              className="w-full bg-black border border-zinc-800 hover:border-zinc-600 focus:border-white rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm text-white font-bold outline-none transition cursor-pointer"
             >
-              <option value="WITHOUT_ANY_SITE" className="bg-black">Sem Nenhum Site ou Landing Page (Recomendado)</option>
+              <option value="WITHOUT_ANY_SITE" className="bg-black">Sem Nenhum Site ou LP (Recomendado)</option>
               <option value="NO_WEBSITE" className="bg-black">100% Sem Domínio / Sem Site</option>
-              <option value="NO_LANDING_PAGE" className="bg-black">Sem Landing Page (Apenas Perfil/Linktree)</option>
-              <option value="SOCIAL_ONLY" className="bg-black">Apenas Redes Sociais (Instagram/Facebook)</option>
+              <option value="NO_LANDING_PAGE" className="bg-black">Sem Landing Page (Só Perfil/Bio)</option>
+              <option value="SOCIAL_ONLY" className="bg-black">Apenas Redes Sociais</option>
               <option value="ALL" className="bg-black">Todos os Estabelecimentos</option>
             </select>
           </div>
 
-          {/* Quick Keyword & Toggles */}
-          <div className="md:col-span-6 lg:col-span-4 flex items-center space-x-3">
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2">
-                Palavra-chave (opcional):
-              </label>
-              <input
-                type="text"
-                placeholder="Ex: Centro, Bairro, Prime, Dr..."
-                value={filters.customKeyword}
-                onChange={(e) => setFilters((prev) => ({ ...prev, customKeyword: e.target.value }))}
-                className="w-full bg-black border border-zinc-800 hover:border-zinc-600 focus:border-white rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-zinc-600 font-bold outline-none transition"
-              />
-            </div>
+          {/* WhatsApp Direct Filter */}
+          <div className="md:col-span-6 lg:col-span-3">
+            <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+              <Phone className="w-3.5 h-3.5 text-white" />
+              <span>Filtro de WhatsApp:</span>
+            </label>
+            <select
+              value={filters.whatsappFilter}
+              onChange={(e) => setFilters((prev) => ({ ...prev, whatsappFilter: e.target.value as any }))}
+              className="w-full bg-black border border-zinc-800 hover:border-zinc-600 focus:border-white rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm text-white font-bold outline-none transition cursor-pointer"
+            >
+              <option value="ALL" className="bg-black">Todos (Com ou Sem WhatsApp)</option>
+              <option value="WITH_WHATSAPP" className="bg-black">Apenas COM WhatsApp Válido</option>
+              <option value="WITHOUT_WHATSAPP" className="bg-black">Apenas SEM WhatsApp (Fixo / Local)</option>
+            </select>
+          </div>
 
-            <div className="pt-6">
-              <button
-                type="button"
-                onClick={() => setFilters((prev) => ({ ...prev, onlyWithPhone: !prev.onlyWithPhone }))}
-                className={`px-3.5 py-2.5 rounded-2xl text-xs font-bold border flex items-center space-x-1.5 transition ${
-                  filters.onlyWithPhone
-                    ? 'bg-white text-black border-white'
-                    : 'bg-black text-zinc-400 border-zinc-800 hover:text-white'
-                }`}
-                title="Filtrar apenas empresas que possuem telefone cadastrado"
-              >
-                <Phone className="w-3.5 h-3.5" />
-                <span>Com Telefone</span>
-              </button>
-            </div>
+          {/* Quick Keyword & Controls */}
+          <div className="md:col-span-6 lg:col-span-2">
+            <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-2">
+              Palavra-chave:
+            </label>
+            <input
+              type="text"
+              placeholder="Ex: Centro, Bairro..."
+              value={filters.customKeyword}
+              onChange={(e) => setFilters((prev) => ({ ...prev, customKeyword: e.target.value }))}
+              className="w-full bg-black border border-zinc-800 hover:border-zinc-600 focus:border-white rounded-2xl px-3 py-2.5 text-xs sm:text-sm text-white placeholder:text-zinc-600 font-bold outline-none transition"
+            />
           </div>
 
           {/* Search Trigger Button */}

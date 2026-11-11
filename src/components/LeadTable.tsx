@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import {
   Star, MessageCircle, Eye, Kanban,
-  ArrowUpDown, CheckSquare, Square, Instagram
+  ArrowUpDown, CheckSquare, Square, Instagram, PhoneCall, Sparkles
 } from 'lucide-react';
 import { Lead } from '../types';
+import { hasValidWhatsApp, getWhatsAppUrl } from '../utils/phoneUtils';
 
 interface LeadTableProps {
   leads: Lead[];
@@ -224,34 +225,33 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                   {/* Actions */}
                   <td className="p-3.5 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end space-x-1.5">
-                      {lead.phone ? (
-                        <>
-                          <a
-                            href={`https://wa.me/${(lead.whatsapp || lead.phone).replace(/\D/g, '').startsWith('55') ? (lead.whatsapp || lead.phone).replace(/\D/g, '') : '55' + (lead.whatsapp || lead.phone).replace(/\D/g, '')}?text=${encodeURIComponent(`Olá, tudo bem? Notei que a ${lead.name} tem ótimas avaliações em ${lead.city}, mas ainda não possui um site oficial para captar clientes do Google. Vocês têm interesse em criar uma página profissional?`)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center space-x-1 transition shadow-sm"
-                            title="Chamar direto no WhatsApp"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5 fill-slate-950" />
-                            <span className="hidden lg:inline">WhatsApp</span>
-                          </a>
-
-                          <a
-                            href={`tel:${lead.phone.replace(/\D/g, '')}`}
-                            className="p-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center transition shadow-sm"
-                            title="Ligar direto"
-                          >
-                            📞
-                          </a>
-                        </>
+                      {hasValidWhatsApp(lead) ? (
+                        <a
+                          href={getWhatsAppUrl(lead) || '#'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-extrabold text-xs flex items-center space-x-1 transition shadow-sm"
+                          title="Chamar direto no WhatsApp"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 fill-black" />
+                          <span className="hidden lg:inline">WhatsApp</span>
+                        </a>
+                      ) : lead.phone ? (
+                        <a
+                          href={`tel:${lead.phone.replace(/\D/g, '')}`}
+                          className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center space-x-1 transition shadow-sm"
+                          title="Ligar para telefone fixo"
+                        >
+                          <PhoneCall className="w-3.5 h-3.5" />
+                          <span className="hidden lg:inline">Ligar</span>
+                        </a>
                       ) : (
                         <button
                           onClick={() => onOpenPitch(lead)}
-                          className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs flex items-center space-x-1 transition shadow-sm"
-                          title="Abrir Pitch de Vendas"
+                          className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center space-x-1 transition shadow-sm"
+                          title="Ver Pitch de Vendas"
                         >
-                          <MessageCircle className="w-3.5 h-3.5 fill-slate-950" />
+                          <Sparkles className="w-3.5 h-3.5 text-white" />
                           <span className="hidden lg:inline">Pitch</span>
                         </button>
                       )}
@@ -260,10 +260,10 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                         href={lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 rounded-lg bg-gradient-to-tr from-pink-900/30 to-purple-900/30 hover:from-pink-800/50 hover:to-purple-800/50 text-pink-300 border border-pink-500/30 transition"
+                        className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 transition"
                         title="Abrir Instagram"
                       >
-                        <Instagram className="w-3.5 h-3.5 text-pink-400" />
+                        <Instagram className="w-3.5 h-3.5 text-zinc-300" />
                       </a>
 
                       <button

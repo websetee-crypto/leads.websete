@@ -63,6 +63,7 @@ export interface SearchFilterState {
   category: string;
   customKeyword: string;
   statusFilter: 'ALL' | 'NO_WEBSITE' | 'NO_LANDING_PAGE' | 'SOCIAL_ONLY' | 'WITHOUT_ANY_SITE';
+  whatsappFilter: 'ALL' | 'WITH_WHATSAPP' | 'WITHOUT_WHATSAPP';
   onlyWithPhone: boolean;
   minRating: number;
   searchSource: 'auto' | 'openstreetmap' | 'google_places' | 'generator';

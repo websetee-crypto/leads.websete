@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, MessageCircle, Mail, Copy, Check, Send, Sparkles, Building2, Edit3, ExternalLink } from 'lucide-react';
+import { X, MessageCircle, Mail, Copy, Check, Send, Sparkles, Building2, Edit3, ExternalLink, Search } from 'lucide-react';
 import { Lead, PitchTemplate, ApiSettings } from '../types';
 import { PITCH_TEMPLATES } from '../data/pitchTemplates';
 import { buildPitchMessage } from '../services/pitchGenerator';
+import { hasValidWhatsApp, getWhatsAppUrl } from '../utils/phoneUtils';
 
 interface PitchModalProps {
   lead: Lead | null;
@@ -36,16 +37,19 @@ export const PitchModal: React.FC<PitchModalProps> = ({
     if (onMarkContacted) onMarkContacted(lead.id);
   };
 
-  const handleOpenWhatsApp = () => {
-    const rawPhone = lead.whatsapp || lead.phone || '';
-    const cleanPhone = rawPhone.replace(/\D/g, '');
-    const encoded = encodeURIComponent(currentMessage);
-    const url = cleanPhone
-      ? `https://wa.me/${cleanPhone.startsWith('55') || cleanPhone.startsWith('351') || cleanPhone.startsWith('1') ? cleanPhone : '55' + cleanPhone}?text=${encoded}`
-      : `https://wa.me/?text=${encoded}`;
+  const validWhatsApp = hasValidWhatsApp(lead);
 
-    window.open(url, '_blank');
-    if (onMarkContacted) onMarkContacted(lead.id);
+  const handleOpenWhatsApp = () => {
+    const url = getWhatsAppUrl(lead, currentMessage);
+    if (url) {
+      window.open(url, '_blank');
+      if (onMarkContacted) onMarkContacted(lead.id);
+    } else {
+      // If no valid WhatsApp, copy message and open Google search
+      handleCopy();
+      const query = encodeURIComponent(`whatsapp ${lead.name} ${lead.city} telefone`);
+      window.open(`https://www.google.com/search?q=${query}`, '_blank');
+    }
   };
 
   return (
@@ -150,39 +154,56 @@ export const PitchModal: React.FC<PitchModalProps> = ({
           </div>
 
           {/* Lead Quick Phone Notice */}
-          <div className="bg-emerald-950/30 border border-emerald-800/40 rounded-xl p-3 flex items-center justify-between text-xs text-emerald-300">
-            <span>Telefone Detectado: <strong>{lead.phone || 'Não detectado'}</strong></span>
-            <span className="text-[11px] text-emerald-400">Pronto para envio direto</span>
+          <div className={`rounded-xl p-3 flex items-center justify-between text-xs border ${
+            validWhatsApp
+              ? 'bg-emerald-950/30 border-emerald-800/40 text-emerald-300'
+              : 'bg-zinc-900 border-zinc-800 text-zinc-400'
+          }`}>
+            <span>Telefone Detectado: <strong className="text-white">{lead.phone || 'Não detectado'}</strong></span>
+            <span className={`text-[11px] font-bold ${validWhatsApp ? 'text-emerald-400' : 'text-zinc-500'}`}>
+              {validWhatsApp ? 'WhatsApp Móvel Verificado' : 'Telefone Fixo / Buscar no Google'}
+            </span>
           </div>
 
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="bg-slate-950 px-6 py-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="bg-zinc-950 px-6 py-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3">
           <button
             onClick={handleCopy}
-            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold flex items-center justify-center space-x-2 border border-slate-700 transition"
+            className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 text-xs sm:text-sm font-semibold flex items-center justify-center space-x-2 border border-zinc-700 transition"
           >
             {copied ? (
               <>
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span className="text-emerald-400 font-bold">Copiado para Área de Transferência!</span>
+                <Check className="w-4 h-4 text-white" />
+                <span className="text-white font-bold">Copiado para Área de Transferência!</span>
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4 text-slate-400" />
+                <Copy className="w-4 h-4 text-zinc-400" />
                 <span>Copiar Mensagem</span>
               </>
             )}
           </button>
 
-          <button
-            onClick={handleOpenWhatsApp}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg shadow-emerald-600/30 transition transform active:scale-95"
-          >
-            <Send className="w-4 h-4 fill-slate-950" />
-            <span>Abrir WhatsApp com Mensagem Pronta 🚀</span>
-          </button>
+          {validWhatsApp ? (
+            <button
+              onClick={handleOpenWhatsApp}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 shadow-lg transition transform active:scale-95"
+            >
+              <Send className="w-4 h-4 fill-black" />
+              <span>Abrir WhatsApp com Mensagem Pronta 🚀</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleOpenWhatsApp}
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 border border-zinc-600 transition"
+              title="Copiar mensagem e buscar contato oficial no Google"
+            >
+              <Search className="w-4 h-4 text-white" />
+              <span>Copiar e Buscar Fone no Google</span>
+            </button>
+          )}
         </div>
 
       </div>

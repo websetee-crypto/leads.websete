@@ -1,6 +1,7 @@
 import React from 'react';
 import { Globe, MessageCircle, DollarSign, Flame, AlertCircle } from 'lucide-react';
 import { Lead } from '../types';
+import { hasValidWhatsApp } from '../utils/phoneUtils';
 
 interface StatsBarProps {
   leads: Lead[];
@@ -20,6 +21,7 @@ export const StatsBar: React.FC<StatsBarProps> = ({ leads, searchMode }) => {
   const formattedLoss = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(totalLoss);
 
   const hotLeads = leads.filter((l) => l.opportunityScore >= 80).length;
+  const withWhatsApp = leads.filter((l) => hasValidWhatsApp(l)).length;
   const withPhone = leads.filter((l) => Boolean(l.phone || l.whatsapp)).length;
 
   return (
@@ -74,22 +76,22 @@ export const StatsBar: React.FC<StatsBarProps> = ({ leads, searchMode }) => {
           </p>
         </div>
 
-        {/* Card 3: Com Contato */}
+        {/* Card 3: Com WhatsApp Ativo */}
         <div className="bg-[#0c0c0e] border border-zinc-800 hover:border-zinc-600 rounded-2xl p-4 transition-all">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Contato Direto</span>
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">WhatsApp Válido</span>
             <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center text-white">
               <MessageCircle className="w-4 h-4 fill-white" />
             </div>
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl sm:text-3xl font-black text-white">{withPhone}</span>
+            <span className="text-2xl sm:text-3xl font-black text-white">{withWhatsApp}</span>
             <span className="text-[11px] font-black text-zinc-300 bg-zinc-900 px-2 py-0.5 rounded-full border border-zinc-700">
-              1-Clique
+              {withPhone} com fone
             </span>
           </div>
           <p className="text-[11px] text-zinc-400 mt-1 font-medium">
-            Prontos para WhatsApp & Ligação
+            Leads com WhatsApp móvel verificado
           </p>
         </div>
 

@@ -44,6 +44,7 @@ export const App: React.FC = () => {
     category: 'todos_comercios',
     customKeyword: '',
     statusFilter: 'WITHOUT_ANY_SITE',
+    whatsappFilter: 'ALL',
     onlyWithPhone: false,
     minRating: 0,
     searchSource: 'auto'

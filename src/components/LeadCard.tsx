@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import {
   Globe, MessageCircle, MapPin, Star, Flame,
   Instagram, ExternalLink, Copy, Check, ShieldAlert, Kanban, Eye, AlertCircle,
-  Clock, PhoneCall, Sparkles
+  Clock, PhoneCall, Sparkles, Phone, Search
 } from 'lucide-react';
 import { Lead } from '../types';
+import { hasValidWhatsApp, getWhatsAppUrl, isLandlinePhone } from '../utils/phoneUtils';
 
 interface LeadCardProps {
   lead: Lead;
@@ -30,19 +31,13 @@ export const LeadCard: React.FC<LeadCardProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const validWhatsApp = hasValidWhatsApp(lead);
+  const isLandline = isLandlinePhone(lead.phone);
+
   const handleDirectWhatsApp = () => {
-    const cleanPhone = (lead.whatsapp || lead.phone || '').replace(/\D/g, '');
-    const defaultPitch = `Olá, tudo bem? Notei que a ${lead.name} tem ótimas avaliações em ${lead.city}, mas ainda não possui um site oficial ou landing page para captar clientes do Google. Vocês têm interesse em criar uma página profissional de alta conversão?`;
-    const encoded = encodeURIComponent(defaultPitch);
-    
-    // Check if phone exists and is not a synthetic test phone
-    if (cleanPhone && cleanPhone.length >= 10 && !cleanPhone.includes('5500') && !cleanPhone.includes('9999')) {
-      const fullNum = cleanPhone.startsWith('55') || cleanPhone.startsWith('351') || cleanPhone.startsWith('1') ? cleanPhone : '55' + cleanPhone;
-      window.open(`https://wa.me/${fullNum}?text=${encoded}`, '_blank');
-    } else {
-      // If synthetic or missing phone, open Google search for the direct WhatsApp/phone of this business
-      const query = encodeURIComponent(`whatsapp ${lead.name} ${lead.city} telefone`);
-      window.open(`https://www.google.com/search?q=${query}`, '_blank');
+    const url = getWhatsAppUrl(lead);
+    if (url) {
+      window.open(url, '_blank');
     }
   };
 
@@ -127,83 +122,80 @@ export const LeadCard: React.FC<LeadCardProps> = ({
           <span className="line-clamp-2">{lead.address}</span>
         </div>
 
-        {/* Contact Channels Grid: WhatsApp, Telefone & Instagram */}
+        {/* Contact Channels Grid */}
         <div className="space-y-1.5 mb-2">
           
-          {/* 1. WhatsApp Box */}
-          <div className="bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/30 rounded-xl p-2 flex items-center justify-between text-xs transition">
-            <div className="flex items-center space-x-2 truncate">
-              <div className="w-5 h-5 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
-                <MessageCircle className="w-3.5 h-3.5 fill-emerald-400" />
-              </div>
-              <div className="truncate">
-                <span className="text-slate-400 font-medium text-[11px] block">WhatsApp:</span>
-                <span className="font-mono text-emerald-300 font-bold truncate">
-                  {lead.phone || lead.whatsapp || 'Disponível no Google'}
-                </span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleDirectWhatsApp}
-              className="text-[11px] font-extrabold text-emerald-950 bg-emerald-400 hover:bg-emerald-300 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
-              title="Abrir WhatsApp com pitch"
-            >
-              <span>Chamar</span>
-              <ExternalLink className="w-3 h-3 ml-0.5" />
-            </button>
-          </div>
-
-          {/* 2. Telefone Box */}
-          <div className="bg-blue-950/30 hover:bg-blue-950/50 border border-blue-500/30 rounded-xl p-2 flex items-center justify-between text-xs transition">
-            <div className="flex items-center space-x-2 truncate">
-              <div className="w-5 h-5 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
-                <PhoneCall className="w-3.5 h-3.5" />
-              </div>
-              <div className="truncate">
-                <span className="text-slate-400 font-medium text-[11px] block">Telefone Fixo / Celular:</span>
-                {lead.phone ? (
-                  <span className="font-mono text-blue-300 font-bold truncate">
-                    {lead.phone}
+          {/* 1. WhatsApp Box - Only rendered if lead has verified WhatsApp */}
+          {validWhatsApp ? (
+            <div className="bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/30 rounded-xl p-2 flex items-center justify-between text-xs transition">
+              <div className="flex items-center space-x-2 truncate">
+                <div className="w-5 h-5 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+                  <MessageCircle className="w-3.5 h-3.5 fill-emerald-400" />
+                </div>
+                <div className="truncate">
+                  <span className="text-zinc-400 font-medium text-[11px] block">WhatsApp Comercial:</span>
+                  <span className="font-mono text-emerald-300 font-bold truncate">
+                    {lead.whatsapp || lead.phone}
                   </span>
-                ) : (
-                  <span className="text-slate-400 text-[11px] truncate">
-                    Ver ficha no Maps
-                  </span>
-                )}
+                </div>
               </div>
+
+              <button
+                onClick={handleDirectWhatsApp}
+                className="text-[11px] font-extrabold text-emerald-950 bg-emerald-400 hover:bg-emerald-300 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
+                title="Abrir WhatsApp com pitch"
+              >
+                <span>Chamar</span>
+                <ExternalLink className="w-3 h-3 ml-0.5" />
+              </button>
             </div>
+          ) : (
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-2 flex items-center justify-between text-xs">
+              <div className="flex items-center space-x-2 truncate">
+                <div className="w-5 h-5 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 shrink-0">
+                  <Phone className="w-3.5 h-3.5" />
+                </div>
+                <div className="truncate">
+                  <span className="text-zinc-500 font-medium text-[11px] block">
+                    {isLandline ? 'Telefone Fixo (Sem WhatsApp):' : 'Canal de Contato:'}
+                  </span>
+                  <span className="font-mono text-zinc-300 font-bold truncate text-[11px]">
+                    {lead.phone || 'Ver ficha no Google Maps'}
+                  </span>
+                </div>
+              </div>
 
-            {lead.phone ? (
-              <a
-                href={`tel:${lead.phone.replace(/\D/g, '')}`}
-                className="text-[11px] font-extrabold text-white bg-blue-600 hover:bg-blue-500 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
-                title="Ligar agora"
-              >
-                <span>Ligar</span>
-              </a>
-            ) : (
-              <a
-                href={lead.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.name + ' ' + lead.city)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] font-bold text-blue-300 bg-blue-500/20 hover:bg-blue-500/30 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 transition"
-                title="Buscar no Google Maps"
-              >
-                <span>Maps ↗</span>
-              </a>
-            )}
-          </div>
+              {lead.phone ? (
+                <a
+                  href={`tel:${lead.phone.replace(/\D/g, '')}`}
+                  className="text-[11px] font-extrabold text-white bg-zinc-800 hover:bg-zinc-700 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 transition"
+                  title="Ligar para telefone fixo"
+                >
+                  <PhoneCall className="w-3 h-3" />
+                  <span>Ligar</span>
+                </a>
+              ) : (
+                <a
+                  href={lead.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lead.name + ' ' + lead.city)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] font-bold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 px-2 py-1 rounded-lg shrink-0 ml-1 transition"
+                >
+                  Ver no Maps ↗
+                </a>
+              )}
+            </div>
+          )}
 
-          {/* 3. Instagram Box */}
-          <div className="bg-gradient-to-r from-pink-950/40 via-purple-950/30 to-indigo-950/40 hover:from-pink-900/50 hover:to-indigo-900/50 border border-pink-500/30 rounded-xl p-2 flex items-center justify-between text-xs transition">
+          {/* 2. Instagram Box */}
+          <div className="bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 rounded-xl p-2 flex items-center justify-between text-xs transition">
             <div className="flex items-center space-x-2 truncate">
-              <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white shrink-0">
+              <div className="w-5 h-5 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-200 shrink-0">
                 <Instagram className="w-3.5 h-3.5" />
               </div>
               <div className="truncate">
-                <span className="text-slate-400 font-medium text-[11px] block">Instagram:</span>
-                <span className="text-pink-300 font-semibold truncate">
+                <span className="text-zinc-400 font-medium text-[11px] block">Instagram / Perfil:</span>
+                <span className="text-zinc-200 font-semibold truncate text-[11px]">
                   {(lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`)
                     .replace('https://www.instagram.com/', '@')
                     .replace('https://instagram.com/', '@')
@@ -216,7 +208,7 @@ export const LeadCard: React.FC<LeadCardProps> = ({
               href={lead.instagramUrl || `https://www.instagram.com/${lead.name.toLowerCase().replace(/[^a-z0-9]/g, '')}/`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[11px] font-extrabold text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
+              className="text-[11px] font-extrabold text-black bg-white hover:bg-zinc-200 px-2.5 py-1 rounded-lg flex items-center space-x-1 shrink-0 ml-1 shadow-sm transition"
               title="Abrir perfil no Instagram"
             >
               <span>Abrir</span>
@@ -228,41 +220,54 @@ export const LeadCard: React.FC<LeadCardProps> = ({
       </div>
 
       {/* Bottom Action Buttons */}
-      <div className="pt-3 border-t border-slate-800/80 mt-2 space-y-2">
+      <div className="pt-3 border-t border-zinc-800 mt-2 space-y-2">
         
-        {/* Main Action Buttons Grid: Direct WhatsApp & Call */}
+        {/* Main Action Buttons Grid */}
         <div className="grid grid-cols-2 gap-2">
           
-          {/* Direct WhatsApp Call */}
-          <button
-            onClick={handleDirectWhatsApp}
-            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 shadow-lg shadow-emerald-500/20 ring-1 ring-white/30 transition-all transform active:scale-[0.98] cursor-pointer"
-            title="Abrir conversa direta no WhatsApp"
-          >
-            <MessageCircle className="w-4 h-4 fill-slate-950" />
-            <span>WhatsApp Direto</span>
-          </button>
-
-          {/* Direct Call or Custom Pitch */}
-          {lead.phone ? (
+          {validWhatsApp ? (
+            /* Direct WhatsApp Call */
+            <button
+              onClick={handleDirectWhatsApp}
+              className="bg-white hover:bg-zinc-200 text-black font-black text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 shadow-lg transition-all transform active:scale-[0.98] cursor-pointer"
+              title="Abrir conversa direta no WhatsApp"
+            >
+              <MessageCircle className="w-4 h-4 fill-black" />
+              <span>WhatsApp Direto</span>
+            </button>
+          ) : lead.phone ? (
+            /* Landline Call */
             <a
               href={`tel:${lead.phone.replace(/\D/g, '')}`}
-              className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 shadow-lg shadow-cyan-600/20 ring-1 ring-white/20 transition-all transform active:scale-[0.98]"
-              title="Ligar agora para o estabelecimento"
+              className="bg-white hover:bg-zinc-200 text-black font-black text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 shadow-lg transition-all transform active:scale-[0.98]"
+              title="Ligar para o telefone fixo do estabelecimento"
             >
               <PhoneCall className="w-4 h-4" />
-              <span>Ligar Agora</span>
+              <span>Ligar Fixo</span>
             </a>
           ) : (
-            <button
-              onClick={() => onOpenPitch(lead)}
-              className="bg-dark-850 hover:bg-dark-800 text-slate-200 font-bold text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 border border-white/[0.08] hover:border-white/20 transition"
-              title="Ver Modelos de Pitch"
+            /* Google Search Contact */
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(lead.name + ' ' + lead.city + ' telefone')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 border border-zinc-700 transition"
+              title="Buscar Telefone no Google"
             >
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>Ver Pitch</span>
-            </button>
+              <Search className="w-4 h-4" />
+              <span>Buscar Fone</span>
+            </a>
           )}
+
+          {/* Custom Pitch button */}
+          <button
+            onClick={() => onOpenPitch(lead)}
+            className="bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-xs py-3 px-3.5 rounded-2xl flex items-center justify-center space-x-1.5 border border-zinc-700 hover:border-zinc-500 transition"
+            title="Ver Modelos de Pitch e Copiar Mensagem"
+          >
+            <Sparkles className="w-4 h-4 text-white" />
+            <span>Ver Pitch</span>
+          </button>
 
         </div>
 
